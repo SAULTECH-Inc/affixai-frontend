@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- AffixAI mark: gradient-filled rounded square with the same PenLine
+       glyph as the in-app Logo component. Kept simple so it renders at
+       16x16 in tab bars without going muddy. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#g)"/>
+  <path d="M9 21 L9 19.5 L18 10.5 L21.5 14 L12.5 23 L11 23 Z M19 9.5 L21 7.5 L24.5 11 L22.5 13 Z"
+        fill="white"/>
+</svg>

@@ -1,0 +1,230 @@
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import {
+  Database,
+  FileSignature,
+  FileText,
+  Sparkles,
+  ArrowUpRight,
+  Calendar,
+  ShieldCheck,
+} from 'lucide-react';
+import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { PageHeader } from '@/components/layout/PageHeader';
+import type { SegmentData, SubscriptionState } from '@/types';
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  to,
+}: {
+  icon: typeof Database;
+  label: string;
+  value: string | number;
+  hint?: string;
+  to?: string;
+}) {
+  const body = (
+    <Card className="hover:border-brand-500/30 transition group">
+      <CardContent className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-fg-muted text-sm">
+            <Icon className="h-4 w-4" />
+            {label}
+          </div>
+          <div className="mt-3 text-3xl font-display font-bold text-fg">
+            {value}
+          </div>
+          {hint && (
+            <div className="mt-1 text-xs text-fg-subtle">{hint}</div>
+          )}
+        </div>
+        {to && (
+          <ArrowUpRight className="h-4 w-4 text-fg-subtle group-hover:text-brand-400 transition" />
+        )}
+      </CardContent>
+    </Card>
+  );
+  return to ? <Link to={to}>{body}</Link> : body;
+}
+
+export default function DashboardPage() {
+  const user = useAuthStore((s) => s.user);
+
+  const { data: segments, isLoading: segLoading } = useQuery({
+    queryKey: ['vault', 'segments'],
+    queryFn: async () => {
+      const { data } = await api.get<SegmentData[]>('/data-vault/segments');
+      return data;
+    },
+  });
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', 'me'],
+    queryFn: async () => {
+      const { data } = await api.get<SubscriptionState>('/subscriptions/me');
+      return data;
+    },
+  });
+
+  const filledFields = segments?.reduce(
+    (sum, s) => sum + Object.keys(s.fields).length,
+    0
+  );
+  const totalFields = 60; // approximate sum across the registry
+  const completion = filledFields
+    ? Math.min(100, Math.round((filledFields / totalFields) * 100))
+    : 0;
+
+  return (
+    <div>
+      <PageHeader
+        title={`Welcome${user?.first_name ? `, ${user.first_name}` : ''}.`}
+        description="Your vault, your documents, your shortcuts — all in one place."
+      />
+
+      {/* Trial banner */}
+      {subscription?.status === 'trialing' && (
+        <Card className="mb-6 border-brand-500/30 bg-gradient-brand-soft">
+          <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-bg-elevated grid place-items-center text-brand-400">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="font-semibold text-fg">
+                  You're on the free trial
+                </div>
+                <p className="text-sm text-fg-muted">
+                  {subscription.days_left ?? 0} days left. Upgrade anytime to keep
+                  unlimited access.
+                </p>
+              </div>
+            </div>
+            <Link to="/billing">
+              <Button>Upgrade plan</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {segLoading ? (
+          <>
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </>
+        ) : (
+          <>
+            <StatCard
+              icon={Database}
+              label="Vault completion"
+              value={`${completion}%`}
+              hint={`${filledFields ?? 0} fields saved`}
+              to="/data-vault"
+            />
+            <StatCard
+              icon={FileSignature}
+              label="Auto-sign ready"
+              value={completion >= 30 ? 'Yes' : 'Not yet'}
+              hint={completion >= 30 ? 'Vault has enough data' : 'Fill more fields first'}
+              to="/auto-sign"
+            />
+            <StatCard
+              icon={ShieldCheck}
+              label="Encryption"
+              value="AES-256"
+              hint="All fields encrypted at rest"
+            />
+          </>
+        )}
+      </div>
+
+      {/* Hero CTA */}
+      <Card className="overflow-hidden">
+        <div className="relative p-8 sm:p-10">
+          <div
+            className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(50% 50% at 80% 20%, rgba(168,85,247,0.35), transparent 70%), radial-gradient(40% 60% at 20% 80%, rgba(236,72,153,0.3), transparent 70%)',
+            }}
+          />
+          <div className="relative max-w-2xl">
+            <Badge tone="brand" className="mb-4">
+              <Sparkles className="h-3 w-3" />
+              AI-powered
+            </Badge>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold leading-tight text-fg">
+              Drop a document.{' '}
+              <span className="text-gradient-brand">We sign it for you.</span>
+            </h2>
+            <p className="mt-3 text-fg-muted">
+              Upload any form, contract, or application. We detect the fields,
+              fill them with your vault data, and stamp your signature — all in
+              under 10 seconds.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Link to="/auto-sign">
+                <Button size="lg">
+                  <FileSignature className="h-4 w-4" />
+                  Auto-sign a document
+                </Button>
+              </Link>
+              <Link to="/data-vault">
+                <Button variant="outline" size="lg">
+                  <Database className="h-4 w-4" />
+                  Manage vault
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Segment progress */}
+      <div className="mt-8">
+        <h3 className="font-display text-lg font-semibold mb-3 text-fg">
+          Vault segments
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {segLoading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-20" />
+              ))
+            : segments?.map((s) => {
+                const count = Object.keys(s.fields).length;
+                return (
+                  <Link
+                    key={s.segment}
+                    to="/data-vault"
+                    className="block"
+                  >
+                    <Card className="hover:border-brand-500/30 transition group">
+                      <CardContent className="flex items-center justify-between py-4">
+                        <div>
+                          <div className="font-medium text-fg">{s.label}</div>
+                          <div className="text-xs text-fg-muted">
+                            {count} {count === 1 ? 'field' : 'fields'} saved
+                          </div>
+                        </div>
+                        <FileText className="h-4 w-4 text-fg-subtle group-hover:text-brand-400 transition" />
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+        </div>
+      </div>
+    </div>
+  );
+}

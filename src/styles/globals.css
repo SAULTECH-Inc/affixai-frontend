@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme tokens — every color the UI uses is one of these. Light & dark just
+   swap the underlying RGB triples; Tailwind classes (bg-bg-base, fg-muted,
+   border-border, etc.) reference these via the `rgb(var(...) / <alpha>)` trick
+   so opacity modifiers (bg-bg-base/80) keep working. */
+
+:root {
+  /* Light mode */
+  --bg-base: 250 250 252;
+  --bg-surface: 255 255 255;
+  --bg-elevated: 255 255 255;
+  --bg-inset: 244 244 247;
+
+  --fg-primary: 17 24 39;
+  --fg-muted: 75 85 99;
+  --fg-subtle: 156 163 175;
+  --fg-inverse: 255 255 255;
+
+  --border-default: 229 231 235;
+  --border-strong: 209 213 219;
+
+  color-scheme: light;
+}
+
+.dark {
+  /* Dark mode — Dashdark X-ish: near-black with subtle blue cast */
+  --bg-base: 9 11 17;
+  --bg-surface: 15 18 27;
+  --bg-elevated: 22 26 38;
+  --bg-inset: 11 14 22;
+
+  --fg-primary: 241 245 249;
+  --fg-muted: 148 163 184;
+  --fg-subtle: 100 116 139;
+  --fg-inverse: 17 24 39;
+
+  --border-default: 30 35 50;
+  --border-strong: 51 58 79;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--border-default));
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    background-color: rgb(var(--bg-base));
+    color: rgb(var(--fg-primary));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* Kill the gray tap-highlight that mobile Safari paints on every
+       button — looks awful with our dark theme. Buttons get their own
+       hover/active states via Tailwind. */
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent text size adjusting weirdly on iOS rotation. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Stop the body from rubber-banding behind the app shell on iOS;
+       individual scrollable regions still scroll fine. */
+    overscroll-behavior-y: none;
+  }
+
+  /* Inputs at <16px font-size cause iOS to auto-zoom on focus. Floor at
+     16px so users don't get the jarring zoom-in/zoom-out dance. Tailwind's
+     text-sm (14px) on inputs is the most common offender. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  @media (min-width: 640px) {
+    /* Above the smallest breakpoint, restore the design sizes. */
+    input,
+    select,
+    textarea {
+      font-size: inherit;
+    }
+  }
+
+  /* Custom scrollbar for the dark UI */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border-strong) / 0.5);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--border-strong));
+  }
+}
+
+@layer utilities {
+  /* iOS notch / home-bar awareness. Use these on the OUTERMOST shell so
+     content stays out of the unusable cutouts when the app is installed
+     as a PWA (display: standalone) or in iOS Safari with viewport-fit. */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Soft halo behind hero text */
+  .glow-brand {
+    position: relative;
+  }
+  .glow-brand::before {
+    content: '';
+    position: absolute;
+    inset: -20% -10%;
+    background: radial-gradient(circle at 30% 50%, rgba(168, 85, 247, 0.25), transparent 60%),
+      radial-gradient(circle at 70% 50%, rgba(236, 72, 153, 0.2), transparent 60%);
+    filter: blur(40px);
+    z-index: -1;
+    pointer-events: none;
+  }
+}

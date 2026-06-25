@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover lets the app paint under iOS notch/home-bar
+         areas; we apply `safe-area-inset-*` padding in CSS to keep
+         interactive content out of those zones. maximumScale=5 keeps
+         pinch-zoom available (better than the maximum-scale=1 pattern
+         that breaks accessibility). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5"
+    />
+
+    <!-- Favicons + PWA manifest. The SVG icon scales crisply at every size;
+         the .ico exists for legacy browsers + bookmark bars. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <!-- Manifest is generated at build time by vite-plugin-pwa
+         (manifest.webmanifest in dist/). Dev preview won't have it yet
+         but browsers gracefully ignore a missing manifest. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0f1219" />
+    <!-- iOS PWA controls. Tells iOS this is a web app that can be added
+         to home screen; black-translucent makes the status bar overlay
+         our gradient instead of stealing 20pt at the top. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AffixAI" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Default SEO. Per-page <Seo> tags in src/components/Seo.tsx override
+         these on a route-by-route basis. This block is what social-card
+         crawlers + non-JS bots see when they hit the entry HTML before
+         React boots — important for share previews. -->
+    <title>AffixAI — Auto-sign any PDF from your encrypted vault</title>
+    <meta
+      name="description"
+      content="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. AES-256-GCM at rest. Built for 47+ currencies. Free 30-day Pro trial."
+    />
+    <link rel="canonical" href="https://affixai.com/" />
+
+    <!-- Open Graph (Facebook, LinkedIn, Slack, Discord) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AffixAI" />
+    <meta property="og:title" content="AffixAI — Auto-sign any PDF from your encrypted vault" />
+    <meta
+      property="og:description"
+      content="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. Free 30-day Pro trial."
+    />
+    <meta property="og:url" content="https://affixai.com/" />
+    <meta property="og:image" content="https://affixai.com/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AffixAI — auto-fill any PDF from an encrypted vault" />
+
+    <!-- Twitter / X cards. summary_large_image is the rich preview. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@affixai" />
+    <meta name="twitter:creator" content="@affixai" />
+    <meta name="twitter:title" content="AffixAI — Auto-sign any PDF from your encrypted vault" />
+    <meta
+      name="twitter:description"
+      content="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. Free 30-day Pro trial."
+    />
+    <meta name="twitter:image" content="https://affixai.com/og-default.png" />
+
+    <!-- Robots: index by default; per-page Seo can override for auth-walled
+         routes (we don't currently noindex anything since auth routes don't
+         have unique URLs that get crawled). -->
+    <meta name="robots" content="index, follow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Editor "signing" fonts: calligraphic + handwriting styles users can pick when
+         stamping text overlays. Mirrors the bundled TTFs in app/static/fonts/ so the
+         in-browser preview matches the final stamped PDF. -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Dancing+Script&family=Great+Vibes&family=Sacramento&display=swap" rel="stylesheet">
+
+    <!-- JSON-LD: Organization + SoftwareApplication. Tells Google what
+         AffixAI is so it can show rich results (sitelinks, knowledge
+         panel, product carousel). Inline is the recommended pattern. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://affixai.com/#organization",
+          "name": "AffixAI",
+          "url": "https://affixai.com/",
+          "logo": "https://affixai.com/logo.png",
+          "sameAs": [
+            "https://twitter.com/affixai",
+            "https://www.linkedin.com/company/affixai",
+            "https://github.com/affixai"
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://affixai.com/#software",
+          "name": "AffixAI",
+          "description": "AI-powered document signing. Auto-fills any PDF from your encrypted personal data vault.",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "url": "https://affixai.com/",
+          "publisher": { "@id": "https://affixai.com/#organization" },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free tier — 5 documents per month. Pro from $5/mo regional pricing."
+          }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Crawler fallback for non-JS bots + LLMs that don't execute
+         scripts (Bingbot, Slurp, GPTBot, etc.). Tier-2 pre-rendering
+         replaces this with a real route-specific snapshot. -->
+    <noscript>
+      <div style="max-width: 720px; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif;">
+        <h1>AffixAI — auto-sign any PDF from your encrypted vault</h1>
+        <p>
+          Drop a contract, NDA, or onboarding form. AffixAI reads it, finds
+          every blank, label, and signature box, and fills it from your
+          encrypted data vault — name, IDs, employer, signature.
+        </p>
+        <ul>
+          <li>Free tier: 5 documents / month</li>
+          <li>Pro: from $5/mo (regional pricing — Paystack for Nigeria,
+              Flutterwave for the rest of Africa, Stripe globally)</li>
+          <li>AES-256-GCM encryption at rest</li>
+          <li>30-day Pro trial, no card required</li>
+        </ul>
+        <p>
+          <a href="/register">Try AffixAI free</a> ·
+          <a href="/about">About</a> ·
+          <a href="/blog">Blog</a> ·
+          <a href="/privacy">Privacy</a> ·
+          <a href="/terms">Terms</a>
+        </p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
