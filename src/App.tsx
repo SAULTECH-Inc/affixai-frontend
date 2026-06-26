@@ -29,6 +29,7 @@ import ContactPage from '@/pages/marketing/ContactPage';
 import PrivacyPage from '@/pages/marketing/PrivacyPage';
 import TermsPage from '@/pages/marketing/TermsPage';
 import DpaPage from '@/pages/marketing/DpaPage';
+import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
@@ -120,6 +121,8 @@ function App() {
           <Route path="/dpa" element={<DpaPage />} />
 
           {/* Public */}
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
