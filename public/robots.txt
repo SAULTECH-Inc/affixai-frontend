@@ -29,4 +29,4 @@ Disallow: /forgot-password
 Disallow: /reset-password
 
 # Sitemap. Update the URL once the domain is finalized.
-Sitemap: https://affixai.com/sitemap.xml
+Sitemap: https://affix-ai.com/sitemap.xml
