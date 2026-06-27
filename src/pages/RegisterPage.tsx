@@ -63,7 +63,7 @@ export default function RegisterPage() {
       </p>
 
       <form className="mt-8 space-y-5" onSubmit={onSubmit}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label htmlFor="first">First name</Label>
             <Input

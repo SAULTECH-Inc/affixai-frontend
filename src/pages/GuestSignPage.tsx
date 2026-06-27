@@ -269,7 +269,7 @@ export default function GuestSignPage() {
   return (
     <div className="min-h-screen bg-bg-base">
       {/* Top brand bar */}
-      <div className="h-16 px-6 flex items-center gap-2 border-b border-border">
+      <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center gap-2 border-b border-border">
         <div className="h-8 w-8 rounded-xl bg-gradient-brand grid place-items-center shadow-glow">
           <Sparkles className="h-4 w-4 text-white" />
         </div>
@@ -278,7 +278,7 @@ export default function GuestSignPage() {
         </span>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Document summary */}
         <Card>
           <CardContent>

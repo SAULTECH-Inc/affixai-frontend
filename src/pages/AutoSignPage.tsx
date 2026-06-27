@@ -85,7 +85,7 @@ export default function AutoSignPage() {
         <Card>
           <CardContent>
             <div
-              className="rounded-2xl border-2 border-dashed border-border p-12 text-center hover:border-brand-500/40 transition cursor-pointer"
+              className="rounded-2xl border-2 border-dashed border-border p-8 sm:p-12 text-center hover:border-brand-500/40 transition cursor-pointer"
               onClick={() => fileRef.current?.click()}
             >
               <input
@@ -129,7 +129,7 @@ export default function AutoSignPage() {
       ) : (
         <Card>
           <CardContent>
-            <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-6">
               <div>
                 <h2 className="font-display text-xl font-bold text-fg flex items-center gap-2">
                   Done.

@@ -268,7 +268,7 @@ export default function DocumentsPage() {
               {filtered.map((d) => (
                 <div
                   key={d.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border bg-bg-inset hover:bg-bg-elevated transition"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 p-3 rounded-xl border border-border bg-bg-inset hover:bg-bg-elevated transition"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="h-10 w-10 rounded-xl bg-bg-elevated border border-border grid place-items-center text-fg-muted shrink-0">
@@ -304,7 +304,7 @@ export default function DocumentsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 sm:shrink-0 flex-wrap">
                     <Badge tone={STATUS_TONE[d.status] || 'neutral'}>
                       {d.status.replace('_', ' ')}
                     </Badge>

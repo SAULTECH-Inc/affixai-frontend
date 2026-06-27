@@ -99,7 +99,7 @@ export default function LandingPage() {
 
 function Hero({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
-    <section className="relative z-10 max-w-7xl mx-auto px-6 pt-16 sm:pt-24 pb-20 sm:pb-32">
+    <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-14 sm:pt-24 pb-16 sm:pb-32">
       <div className="text-center max-w-4xl mx-auto">
         <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 mb-7 text-xs font-medium text-brand-300">
           <Sparkles className="h-3.5 w-3.5" />
@@ -260,7 +260,7 @@ function HeroPreview() {
 
 function LogoStrip() {
   return (
-    <section className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-y border-border/50">
+    <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 border-y border-border/50">
       <p className="text-center text-xs uppercase tracking-widest text-fg-subtle mb-5">
         Built for individuals, teams, and enterprises
       </p>
@@ -325,7 +325,7 @@ function FeatureGrid() {
   return (
     <section
       id="features"
-      className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32"
     >
       <SectionHeader
         eyebrow="What it does"
@@ -384,7 +384,7 @@ function HowItWorks() {
   return (
     <section
       id="how"
-      className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32"
     >
       <SectionHeader
         eyebrow="How it works"
@@ -420,8 +420,8 @@ function HowItWorks() {
 
 function DataVaultSpotlight() {
   return (
-    <section className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32">
-      <div className="rounded-3xl border border-border bg-gradient-to-br from-bg-elevated to-bg-surface p-8 sm:p-14 overflow-hidden relative">
+    <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
+      <div className="rounded-3xl border border-border bg-gradient-to-br from-bg-elevated to-bg-surface p-5 sm:p-8 lg:p-14 overflow-hidden relative">
         <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative">
           <div>
@@ -498,7 +498,7 @@ function SecurityStrip() {
   return (
     <section
       id="security"
-      className="relative z-10 max-w-7xl mx-auto px-6 py-20"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20"
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
@@ -652,7 +652,7 @@ function Pricing() {
   return (
     <section
       id="pricing"
-      className="relative z-10 max-w-7xl mx-auto px-6 py-24 sm:py-32"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32"
     >
       <SectionHeader
         eyebrow="Pricing"
@@ -717,8 +717,8 @@ function Pricing() {
 
 function FinalCta({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
-    <section className="relative z-10 max-w-5xl mx-auto px-6 py-20">
-      <div className="rounded-3xl border border-border bg-gradient-to-br from-brand-500/15 via-bg-elevated to-accent-500/15 p-10 sm:p-16 text-center overflow-hidden relative">
+    <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+      <div className="rounded-3xl border border-border bg-gradient-to-br from-brand-500/15 via-bg-elevated to-accent-500/15 p-6 sm:p-10 lg:p-16 text-center overflow-hidden relative">
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-72 w-[600px] bg-brand-500/20 blur-3xl rounded-full" />
         <div className="relative">
           <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight leading-tight">

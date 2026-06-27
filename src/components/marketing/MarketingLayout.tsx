@@ -79,7 +79,7 @@ function MarketingHeader({
   ] as const;
 
   return (
-    <header className="relative z-10 max-w-7xl mx-auto px-6 py-6">
+    <header className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
       <div className="flex items-center justify-between">
         <Logo />
         <nav className="hidden md:flex items-center gap-8 text-sm text-fg-muted">
@@ -189,7 +189,7 @@ export function Logo() {
 function MarketingFooter() {
   return (
     <footer className="relative z-10 border-t border-border mt-10">
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 grid grid-cols-2 md:grid-cols-5 gap-5 sm:gap-8">
         <div className="col-span-2">
           <Logo />
           <p className="mt-4 text-sm text-fg-muted max-w-xs">
@@ -225,7 +225,7 @@ function MarketingFooter() {
         />
       </div>
       <div className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-fg-subtle">
             © 2026 AffixAI. All rights reserved.
           </p>
@@ -295,7 +295,7 @@ export function PageHero({
   subtitle?: string;
 }) {
   return (
-    <section className="relative max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
+    <section className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-8 sm:pb-12 text-center">
       {eyebrow && (
         <div className="inline-flex items-center gap-2 rounded-full bg-bg-inset border border-border px-3 py-1 text-xs font-medium text-fg-muted mb-5">
           {eyebrow}
@@ -317,7 +317,7 @@ export function Prose({ children }: { children: React.ReactNode }) {
   // Long-form text container with sane typography defaults. Used by Privacy,
   // Terms, DPA and About.
   return (
-    <div className="relative max-w-3xl mx-auto px-6 pb-20 prose-marketing">
+    <div className="relative max-w-3xl mx-auto px-4 sm:px-6 pb-14 sm:pb-20 prose-marketing">
       <style>{`
         .prose-marketing h2 {
           font-family: 'Plus Jakarta Sans', Inter, sans-serif;

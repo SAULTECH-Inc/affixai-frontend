@@ -173,7 +173,7 @@ export default function DashboardPage() {
               fill them with your vault data, and stamp your signature — all in
               under 10 seconds.
             </p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
               <Link to="/auto-sign">
                 <Button size="lg">
                   <FileSignature className="h-4 w-4" />

@@ -17,7 +17,7 @@ export default function AboutPage() {
         subtitle="AffixAI was built because nobody enjoys typing their address into the seventeenth form this month. We thought computers could do better."
       />
 
-      <section className="max-w-4xl mx-auto px-6 pb-16">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
             {
