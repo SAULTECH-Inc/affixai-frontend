@@ -19,6 +19,12 @@ import {
   ScanLine,
   FolderLock,
   UploadCloud,
+  GitMerge,
+  MessageSquare,
+  Puzzle,
+  Download,
+  Globe,
+  CornerDownLeft,
 } from 'lucide-react';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 
@@ -87,6 +93,8 @@ export default function LandingPage() {
       <LogoStrip />
       <FeatureGrid />
       <HowItWorks />
+      <CollaborationSection />
+      <ChromeExtensionSection />
       <DataVaultSpotlight />
       <SecurityStrip />
       <Pricing />
@@ -103,7 +111,7 @@ function Hero({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="text-center max-w-4xl mx-auto">
         <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 mb-7 text-xs font-medium text-brand-300">
           <Sparkles className="h-3.5 w-3.5" />
-          New · Multi-entry vault for education & roles
+          New · Sequential signing, bulk invites & browser auto-fill
         </div>
         <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
           Stop re-typing the same{' '}
@@ -411,6 +419,179 @@ function HowItWorks() {
             </p>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+// ---- Collaboration ---------------------------------------------------------
+
+function CollaborationSection() {
+  const features = [
+    {
+      icon: Users,
+      title: 'Bulk invite via CSV or Excel',
+      body: 'Upload a spreadsheet with columns Name, Email, Role, and Order. Everyone gets a magic-link invite in one shot — no copy-pasting.',
+    },
+    {
+      icon: GitMerge,
+      title: 'Sequential or parallel signing',
+      body: 'Sequential mode gates each signer on the previous one completing. Parallel mode lets everyone sign at the same time.',
+    },
+    {
+      icon: CornerDownLeft,
+      title: 'Reject-back flow',
+      body: 'Spot an error? Reject the document back to any signer in the chain — with a reason — without killing the workflow. The fix lands, life goes on.',
+    },
+    {
+      icon: MessageSquare,
+      title: 'Field-level comments',
+      body: 'Pin a comment to a specific field. The next signer sees exactly what needs fixing. Comments are removed before the final PDF is generated.',
+    },
+  ];
+  return (
+    <section
+      id="collaboration"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32"
+    >
+      <SectionHeader
+        eyebrow="Collaboration"
+        title="Multi-party signing that actually works"
+        subtitle="Invite one person or a hundred. Keep the workflow moving even when something needs fixing."
+      />
+      <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-5">
+        {features.map((f) => (
+          <div
+            key={f.title}
+            className="group relative rounded-2xl border border-border bg-bg-elevated p-7 hover:border-brand-500/40 transition"
+          >
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-brand-500/0 to-accent-500/0 group-hover:from-brand-500/[0.06] group-hover:to-accent-500/[0.06] transition pointer-events-none" />
+            <div className="relative flex gap-4">
+              <div className="shrink-0 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500/20 to-accent-500/20 text-brand-300">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-semibold mb-1.5">{f.title}</h3>
+                <p className="text-sm text-fg-muted leading-relaxed">{f.body}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---- Chrome Extension ------------------------------------------------------
+
+function ChromeExtensionSection() {
+  return (
+    <section
+      id="extension"
+      className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32"
+    >
+      <div className="rounded-3xl border border-border bg-gradient-to-br from-bg-elevated to-bg-surface p-5 sm:p-8 lg:p-14 overflow-hidden relative">
+        <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-accent-500/15 blur-3xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative">
+          {/* Left: copy */}
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-bg-inset border border-border px-3 py-1 text-xs text-fg-muted mb-5">
+              <Puzzle className="h-3.5 w-3.5 text-brand-400" />
+              Chrome Extension
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+              Fill any online form{' '}
+              <span className="text-gradient-brand">in one click</span>.
+            </h2>
+            <p className="mt-5 text-fg-muted text-base sm:text-lg leading-relaxed">
+              Install the AffixAI Chrome extension and your vault data travels
+              with you across the web. It intelligently matches form fields by
+              name, label, placeholder, and autocomplete attribute — so the
+              right value lands in the right box every time.
+            </p>
+            <ul className="mt-7 space-y-3 text-sm">
+              {[
+                'Intelligent field matching — autocomplete, name, id, label, placeholder',
+                'One-click fill on any website — government forms, job applications, onboarding',
+                'Your data never leaves your device unencrypted',
+                'Accept T&C once, sign in with your AffixAI account, done',
+              ].map((t) => (
+                <li key={t} className="flex items-start gap-2.5 text-fg-muted">
+                  <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-9 flex flex-col sm:flex-row gap-3">
+              <a
+                href="https://chromewebstore.google.com/detail/affixai"
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 transition"
+              >
+                <Download className="h-4 w-4" />
+                Add to Chrome — it's free
+              </a>
+              <a
+                href="https://github.com/SAULTECH-Inc/affixai-extension"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-bg-base px-5 py-3 text-sm font-semibold text-fg hover:bg-bg-inset transition"
+              >
+                <Globe className="h-4 w-4" />
+                View source
+              </a>
+            </div>
+          </div>
+          {/* Right: visual demo */}
+          <div className="relative">
+            <div className="rounded-2xl border border-border bg-bg-base/60 shadow-card overflow-hidden">
+              {/* Faux browser bar */}
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-bg-surface/80">
+                <div className="flex gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+                </div>
+                <div className="flex-1 mx-3 rounded-md bg-bg-elevated px-2 py-1 text-[10px] font-mono text-fg-subtle truncate">
+                  https://gov.example.com/application-form
+                </div>
+                {/* Extension icon */}
+                <div className="h-6 w-6 rounded-md bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
+                  <Puzzle className="h-3.5 w-3.5 text-white" />
+                </div>
+              </div>
+              {/* Form fields */}
+              <div className="p-5 space-y-3 text-xs">
+                {[
+                  { label: 'Full name', value: 'Jane R. Doe', filled: true },
+                  { label: 'Date of birth', value: '1992-04-11', filled: true },
+                  { label: 'Address', value: '221B Baker Street, London', filled: true },
+                  { label: 'National ID', value: 'NG-0042-7891', filled: true },
+                  { label: 'Occupation', value: 'Software Engineer', filled: true },
+                ].map((f) => (
+                  <div key={f.label} className="space-y-1">
+                    <div className="text-fg-subtle font-medium">{f.label}</div>
+                    <div
+                      className={
+                        'rounded-lg border px-3 py-2 font-mono ' +
+                        (f.filled
+                          ? 'border-brand-500/40 bg-brand-500/10 text-brand-200 ring-1 ring-brand-500/20'
+                          : 'border-border text-fg-muted')
+                      }
+                    >
+                      {f.value}
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-2 flex items-center gap-2 text-brand-300 font-medium">
+                  <Zap className="h-3.5 w-3.5" />
+                  5 fields filled in 0.8 s
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

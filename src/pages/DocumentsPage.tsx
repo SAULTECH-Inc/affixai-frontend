@@ -459,6 +459,7 @@ type ParticipantStatus =
   | 'signed'
   | 'approved'
   | 'declined'
+  | 'rejected'
   | 'revoked';
 
 interface ParticipantOut {
@@ -500,6 +501,7 @@ const STATUS_PILL: Record<
   signed: { tone: 'success', label: 'Signed', icon: CheckCircle2 },
   approved: { tone: 'success', label: 'Approved', icon: CheckCircle2 },
   declined: { tone: 'danger', label: 'Declined', icon: XIcon },
+  rejected: { tone: 'warning', label: 'Rejected', icon: CornerDownRight },
   revoked: { tone: 'neutral', label: 'Revoked', icon: XIcon },
 };
 
@@ -618,19 +620,19 @@ function ShareModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
     },
   });
 
+  const [inviteTab, setInviteTab] = useState<'single' | 'bulk'>('single');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<ParticipantRole>('signer');
+  const [order, setOrder] = useState<number>(1);
   const [message, setMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
 
   const invite = useMutation({
     mutationFn: async () => {
       const { data } = await api.post(
         `/documents/${doc.id}/participants`,
-        {
-          email: email.trim(),
-          role,
-          message: message.trim() || null,
-        }
+        { email: email.trim(), role, sequence_order: order, message: message.trim() || null }
       );
       return data;
     },
@@ -643,6 +645,32 @@ function ShareModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.detail || 'Could not invite');
+    },
+  });
+
+  const bulkImport = useMutation({
+    mutationFn: async () => {
+      if (!bulkFile) throw new Error('No file selected');
+      const form = new FormData();
+      form.append('file', bulkFile);
+      const { data } = await api.post(
+        `/documents/${doc.id}/participants/import`,
+        form,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      return data;
+    },
+    onSuccess: (data: any) => {
+      const c = data.created?.length ?? 0;
+      const u = data.updated?.length ?? 0;
+      const f = data.failed?.length ?? 0;
+      toast.success(`Import done: ${c} invited, ${u} updated${f ? `, ${f} failed` : ''}`);
+      setBulkFile(null);
+      refetch();
+      qc.invalidateQueries({ queryKey: ['document', doc.id, 'activity'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Import failed');
     },
   });
 
@@ -700,52 +728,135 @@ function ShareModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
         </div>
 
         {/* Invite form */}
-        <div className="rounded-2xl border border-border p-4 mb-5 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_140px] gap-3">
-            <div>
-              <Label htmlFor="invite-email">Email</Label>
-              <Input
-                id="invite-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="person@example.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="invite-role">Role</Label>
-              <select
-                id="invite-role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as ParticipantRole)}
-                className="w-full h-10 px-3 rounded-xl border border-border bg-bg-base text-sm text-fg"
+        <div className="rounded-2xl border border-border mb-5 overflow-hidden">
+          {/* Sub-tab bar */}
+          <div className="flex items-center border-b border-border px-4 pt-3 gap-1">
+            {([
+              { id: 'single', label: 'Single invite' },
+              { id: 'bulk', label: 'Bulk upload (CSV / Excel)' },
+            ] as const).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setInviteTab(t.id)}
+                className={cn(
+                  'px-3 py-2 text-xs font-medium border-b-2 -mb-px transition',
+                  inviteTab === t.id
+                    ? 'border-brand-500 text-fg'
+                    : 'border-transparent text-fg-muted hover:text-fg'
+                )}
               >
-                <option value="signer">Signer</option>
-                <option value="reviewer">Reviewer</option>
-                <option value="viewer">Viewer</option>
-              </select>
-            </div>
+                {t.label}
+              </button>
+            ))}
           </div>
-          <div>
-            <Label htmlFor="invite-msg">Message (optional)</Label>
-            <textarea
-              id="invite-msg"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={2}
-              placeholder="Hi, please sign by EOD…"
-              className="w-full px-3 py-2 rounded-xl border border-border bg-bg-base text-sm text-fg resize-y"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button
-              onClick={() => invite.mutate()}
-              loading={invite.isPending}
-              disabled={!email.trim()}
-            >
-              <UserPlus className="h-4 w-4" />
-              Send invite
-            </Button>
+
+          <div className="p-4 space-y-3">
+            {inviteTab === 'single' ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px_72px] gap-3">
+                  <div>
+                    <Label htmlFor="invite-email">Email</Label>
+                    <Input
+                      id="invite-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="person@example.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="invite-role">Role</Label>
+                    <select
+                      id="invite-role"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value as ParticipantRole)}
+                      className="w-full h-10 px-3 rounded-xl border border-border bg-bg-base text-sm text-fg"
+                    >
+                      <option value="signer">Signer</option>
+                      <option value="reviewer">Reviewer</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="invite-order">Order</Label>
+                    <input
+                      id="invite-order"
+                      type="number"
+                      min={1}
+                      value={order}
+                      onChange={(e) => setOrder(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-full h-10 px-3 rounded-xl border border-border bg-bg-base text-sm text-fg text-right"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="invite-msg">Message (optional)</Label>
+                  <textarea
+                    id="invite-msg"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={2}
+                    placeholder="Hi, please sign by EOD…"
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-bg-base text-sm text-fg resize-y"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={() => invite.mutate()} loading={invite.isPending} disabled={!email.trim()}>
+                    <UserPlus className="h-4 w-4" />
+                    Send invite
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-fg-muted leading-relaxed">
+                  Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with columns:{' '}
+                  <code className="bg-bg-inset px-1 py-0.5 rounded text-[11px]">Name</code>,{' '}
+                  <code className="bg-bg-inset px-1 py-0.5 rounded text-[11px]">Email</code>,{' '}
+                  <code className="bg-bg-inset px-1 py-0.5 rounded text-[11px]">Role</code> (signer / reviewer / viewer),{' '}
+                  <code className="bg-bg-inset px-1 py-0.5 rounded text-[11px]">Order</code> (1-based integer).
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  className="hidden"
+                  onChange={(e) => setBulkFile(e.target.files?.[0] ?? null)}
+                />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 cursor-pointer transition',
+                    bulkFile
+                      ? 'border-brand-500/50 bg-brand-500/5'
+                      : 'border-border hover:border-fg-muted/40'
+                  )}
+                >
+                  {bulkFile ? (
+                    <>
+                      <Check className="h-5 w-5 text-brand-400" />
+                      <span className="text-sm font-medium text-fg">{bulkFile.name}</span>
+                      <span className="text-xs text-fg-muted">Click to change</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-5 w-5 text-fg-subtle" />
+                      <span className="text-sm text-fg-muted">Click to choose file</span>
+                    </>
+                  )}
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => bulkImport.mutate()}
+                    loading={bulkImport.isPending}
+                    disabled={!bulkFile}
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Import & invite
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
