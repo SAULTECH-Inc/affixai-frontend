@@ -25,6 +25,7 @@ import {
   Trash2,
   CheckCircle2,
   Save,
+  Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -32,6 +33,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
+import { Sheet } from '@/components/ui/Sheet';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { cn } from '@/lib/cn';
 import type { Placement, PlacementKind } from '@/types';
@@ -176,6 +178,7 @@ export default function ParticipantSignPage() {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const [armedItem, setArmedItem] = useState<DraggablePaletteItem | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [commentMode, setCommentMode] = useState(false);
   const [pendingComment, setPendingComment] = useState<{
     page: number;
@@ -281,7 +284,7 @@ export default function ParticipantSignPage() {
     let objUrl: string | null = null;
     (async () => {
       try {
-        const resp = await api.get(`/documents/${id}/file/original`, {
+        const resp = await api.get(`/documents/${id}/file`, {
           responseType: 'blob',
         });
         if (cancelled) return;
@@ -525,109 +528,213 @@ export default function ParticipantSignPage() {
           </CardContent>
         </Card>
 
-        <Card className="self-start">
+        {/* Desktop panel */}
+        <Card className="self-start hidden lg:block">
           <CardContent>
-            {selectedIdx !== null && placements[selectedIdx] ? (
-              <FontControlsPanel
-                placement={placements[selectedIdx]}
-                onChange={(changes) => updatePlacement(selectedIdx, changes)}
-                onDeselect={() => setSelectedIdx(null)}
-              />
-            ) : (
-              <>
-                <h2 className="font-display text-lg font-semibold text-fg mb-1">
-                  Signing fields
-                </h2>
-                <p className="text-xs text-fg-muted mb-3">
-                  {placements.length} placement{placements.length === 1 ? '' : 's'}
-                  {sharedData?.my_targets.length
-                    ? ` · ${sharedData.my_targets.length} pre-assigned`
-                    : ''}
-                </p>
-
-                {armedItem !== null && (
-                  <div className="mb-3 p-2.5 rounded-xl border border-brand-500/40 bg-gradient-brand-soft flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-md bg-bg-elevated grid place-items-center text-brand-400 shrink-0">
-                      {armedItem.icon ?? <TypeIcon className="h-3.5 w-3.5" />}
-                    </div>
-                    <div className="text-xs text-fg flex-1 min-w-0">
-                      <div className="font-medium truncate">{armedItem.label}</div>
-                      <div className="text-fg-muted">Click on the document to drop. Esc cancels.</div>
-                    </div>
-                    <button
-                      onClick={() => setArmedItem(null)}
-                      className="text-xs text-fg-muted hover:text-fg px-2 py-1 rounded-md border border-border hover:bg-bg-elevated shrink-0"
-                      title="Stop placing"
-                    >
-                      Done
-                    </button>
-                  </div>
-                )}
-
-                <DefaultsBlock value={defaults} onChange={updateDefaults} />
-
-                <div className="relative mb-3">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-fg-subtle" />
-                  <Input
-                    placeholder="Search…"
-                    value={paletteSearch}
-                    onChange={(e) => setPaletteSearch(e.target.value)}
-                    className="pl-8 h-8 text-sm"
-                  />
-                </div>
-                <div className="max-h-[60vh] overflow-y-auto space-y-1 pr-1">
-                  {filteredPalette.map((it) => {
-                    const isThisArmed = armedItem !== null && armedItem.id === it.id;
-                    return (
-                      <div
-                        key={it.id}
-                        draggable
-                        onClick={() => setArmedItem((cur) => (cur?.id === it.id ? null : it))}
-                        onDragStart={(e) => {
-                          e.dataTransfer.effectAllowed = 'copyMove';
-                          e.dataTransfer.setData('text/plain', it.id);
-                          dragSourceRef.current = { kind: 'palette', item: it };
-                          dragOffsetRef.current = { x: 0, y: 0 };
-                        }}
-                        onDragEnd={() => {
-                          dragSourceRef.current = null;
-                        }}
-                        className={cn(
-                          'group p-2 rounded-lg border bg-bg-inset cursor-pointer transition',
-                          isThisArmed
-                            ? 'border-brand-500/60 bg-gradient-brand-soft ring-2 ring-brand-500/30'
-                            : 'border-border hover:border-brand-500/40 hover:bg-bg-elevated',
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-md bg-bg-elevated grid place-items-center text-fg-muted shrink-0">
-                            {it.icon ?? <TypeIcon className="h-3.5 w-3.5" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium text-fg truncate">{it.label}</div>
-                            {it.value && (
-                              <div className="text-xs text-fg-muted truncate">{it.value}</div>
-                            )}
-                          </div>
-                          {isThisArmed && (
-                            <span className="text-[10px] uppercase tracking-wider text-brand-400 font-semibold shrink-0">
-                              armed
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {filteredPalette.length === 0 && (
-                    <p className="text-xs text-fg-subtle py-4 text-center">No matches.</p>
-                  )}
-                </div>
-              </>
-            )}
+            <PalettePanel
+              selectedIdx={selectedIdx}
+              placements={placements}
+              paletteSearch={paletteSearch}
+              filteredPalette={filteredPalette}
+              armedItem={armedItem}
+              defaults={defaults}
+              preAssignedCount={sharedData?.my_targets.length ?? 0}
+              panelTitle="Signing fields"
+              onPaletteSearch={setPaletteSearch}
+              onArm={(it) => setArmedItem((cur) => (cur?.id === it.id ? null : it))}
+              onDisarm={() => setArmedItem(null)}
+              onDefaultsChange={updateDefaults}
+              onPaletteDragStart={(it) => {
+                dragSourceRef.current = { kind: 'palette', item: it };
+                dragOffsetRef.current = { x: 0, y: 0 };
+              }}
+              onPaletteDragEnd={() => { dragSourceRef.current = null; }}
+              onDeselect={() => setSelectedIdx(null)}
+              onPlacementChange={(changes) => selectedIdx !== null && updatePlacement(selectedIdx, changes)}
+            />
           </CardContent>
         </Card>
       </div>
+
+      {/* Mobile: floating "Fields" button */}
+      <div className="lg:hidden fixed bottom-6 right-6 z-30">
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white rounded-full px-4 py-3 shadow-lg text-sm font-medium transition"
+          aria-label="Open fields panel"
+        >
+          <Layers className="h-4 w-4" />
+          Fields
+          {placements.length > 0 && (
+            <span className="bg-white/25 rounded-full px-1.5 py-0.5 text-xs font-bold leading-none">
+              {placements.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile: bottom sheet */}
+      <Sheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        title="Signing fields"
+      >
+        <PalettePanel
+          selectedIdx={selectedIdx}
+          placements={placements}
+          paletteSearch={paletteSearch}
+          filteredPalette={filteredPalette}
+          armedItem={armedItem}
+          defaults={defaults}
+          preAssignedCount={sharedData?.my_targets.length ?? 0}
+          panelTitle="Signing fields"
+          onPaletteSearch={setPaletteSearch}
+          onArm={(it) => { setArmedItem((cur) => (cur?.id === it.id ? null : it)); setSheetOpen(false); }}
+          onDisarm={() => setArmedItem(null)}
+          onDefaultsChange={updateDefaults}
+          onPaletteDragStart={(it) => {
+            dragSourceRef.current = { kind: 'palette', item: it };
+            dragOffsetRef.current = { x: 0, y: 0 };
+          }}
+          onPaletteDragEnd={() => { dragSourceRef.current = null; }}
+          onDeselect={() => setSelectedIdx(null)}
+          onPlacementChange={(changes) => selectedIdx !== null && updatePlacement(selectedIdx, changes)}
+        />
+      </Sheet>
     </div>
+  );
+}
+
+// ---- Shared palette panel component ----------------------------------------
+
+interface PalettePanelProps {
+  selectedIdx: number | null;
+  placements: Placement[];
+  paletteSearch: string;
+  filteredPalette: DraggablePaletteItem[];
+  armedItem: DraggablePaletteItem | null;
+  defaults: { font_family: string; fontsize: number; bold: boolean; italic: boolean; color: string };
+  preAssignedCount?: number;
+  panelTitle?: string;
+  onPaletteSearch: (v: string) => void;
+  onArm: (it: DraggablePaletteItem) => void;
+  onDisarm: () => void;
+  onDefaultsChange: (v: any) => void;
+  onPaletteDragStart: (it: DraggablePaletteItem) => void;
+  onPaletteDragEnd: () => void;
+  onDeselect: () => void;
+  onPlacementChange: (changes: Partial<Placement>) => void;
+}
+
+function PalettePanel({
+  selectedIdx,
+  placements,
+  paletteSearch,
+  filteredPalette,
+  armedItem,
+  defaults,
+  preAssignedCount = 0,
+  panelTitle = 'Fields',
+  onPaletteSearch,
+  onArm,
+  onDisarm,
+  onDefaultsChange,
+  onPaletteDragStart,
+  onPaletteDragEnd,
+  onDeselect,
+  onPlacementChange,
+}: PalettePanelProps) {
+  if (selectedIdx !== null && placements[selectedIdx]) {
+    return (
+      <FontControlsPanel
+        placement={placements[selectedIdx]}
+        onChange={onPlacementChange}
+        onDeselect={onDeselect}
+      />
+    );
+  }
+  return (
+    <>
+      <h2 className="font-display text-lg font-semibold text-fg mb-1">{panelTitle}</h2>
+      <p className="text-xs text-fg-muted mb-3">
+        {placements.length} placement{placements.length === 1 ? '' : 's'}
+        {preAssignedCount > 0 ? ` · ${preAssignedCount} pre-assigned` : ''}
+      </p>
+
+      {armedItem !== null && (
+        <div className="mb-3 p-2.5 rounded-xl border border-brand-500/40 bg-gradient-brand-soft flex items-center gap-2">
+          <div className="h-6 w-6 rounded-md bg-bg-elevated grid place-items-center text-brand-400 shrink-0">
+            {armedItem.icon ?? <TypeIcon className="h-3.5 w-3.5" />}
+          </div>
+          <div className="text-xs text-fg flex-1 min-w-0">
+            <div className="font-medium truncate">{armedItem.label}</div>
+            <div className="text-fg-muted">Click on the document to drop. Esc cancels.</div>
+          </div>
+          <button
+            onClick={onDisarm}
+            className="text-xs text-fg-muted hover:text-fg px-2 py-1 rounded-md border border-border hover:bg-bg-elevated shrink-0"
+          >
+            Done
+          </button>
+        </div>
+      )}
+
+      <DefaultsBlock value={defaults} onChange={onDefaultsChange} />
+
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-fg-subtle" />
+        <Input
+          placeholder="Search…"
+          value={paletteSearch}
+          onChange={(e) => onPaletteSearch(e.target.value)}
+          className="pl-8 h-8 text-sm"
+        />
+      </div>
+      <div className="space-y-1 pr-1">
+        {filteredPalette.map((it) => {
+          const isThisArmed = armedItem !== null && armedItem.id === it.id;
+          return (
+            <div
+              key={it.id}
+              draggable
+              onClick={() => onArm(it)}
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = 'copyMove';
+                e.dataTransfer.setData('text/plain', it.id);
+                onPaletteDragStart(it);
+              }}
+              onDragEnd={onPaletteDragEnd}
+              className={cn(
+                'group p-2 rounded-lg border bg-bg-inset cursor-pointer transition',
+                isThisArmed
+                  ? 'border-brand-500/60 bg-gradient-brand-soft ring-2 ring-brand-500/30'
+                  : 'border-border hover:border-brand-500/40 hover:bg-bg-elevated',
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-md bg-bg-elevated grid place-items-center text-fg-muted shrink-0">
+                  {it.icon ?? <TypeIcon className="h-3.5 w-3.5" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium text-fg truncate">{it.label}</div>
+                  {it.value && (
+                    <div className="text-xs text-fg-muted truncate">{it.value}</div>
+                  )}
+                </div>
+                {isThisArmed && (
+                  <span className="text-[10px] uppercase tracking-wider text-brand-400 font-semibold shrink-0">
+                    armed
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {filteredPalette.length === 0 && (
+          <p className="text-xs text-fg-subtle py-4 text-center">No matches.</p>
+        )}
+      </div>
+    </>
   );
 }
 
