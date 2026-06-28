@@ -523,25 +523,22 @@ function ChromeExtensionSection() {
               ))}
             </ul>
             <div className="mt-9 flex flex-col sm:flex-row gap-3">
-              <a
-                href="https://chromewebstore.google.com/detail/affixai"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                to="/register"
                 className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 transition"
               >
                 <Download className="h-4 w-4" />
-                Add to Chrome — it's free
-              </a>
-              <a
-                href="https://github.com/SAULTECH-Inc/affixai-extension"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-bg-base px-5 py-3 text-sm font-semibold text-fg hover:bg-bg-inset transition"
-              >
-                <Globe className="h-4 w-4" />
-                View source
-              </a>
+                Get early access
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <div className="inline-flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-5 py-3 text-sm font-medium text-fg-muted cursor-default select-none">
+                <Globe className="h-4 w-4 shrink-0" />
+                Chrome Web Store — coming soon
+              </div>
             </div>
+            <p className="mt-4 text-xs text-fg-subtle">
+              Create a free account to join the early access programme and be notified when the extension launches on the Chrome Web Store.
+            </p>
           </div>
           {/* Right: visual demo */}
           <div className="relative">
