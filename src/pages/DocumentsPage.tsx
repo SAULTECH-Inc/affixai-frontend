@@ -727,12 +727,15 @@ function ShareModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
           </button>
         </div>
 
+        {/* Scrollable body — flex-1 + min-h-0 keeps Done pinned at the bottom */}
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+
         {/* Invite form */}
         <div className="rounded-2xl border border-border mb-5 overflow-hidden">
           {/* Sub-tab bar */}
           <div className="flex items-center border-b border-border px-4 pt-3 gap-1">
             {([
-              { id: 'single', label: 'Single invite' },
+              { id: 'single', label: 'Add manually' },
               { id: 'bulk', label: 'Bulk upload (CSV / Excel)' },
             ] as const).map((t) => (
               <button
@@ -1159,8 +1162,10 @@ function ShareModal({ doc, onClose }: { doc: Doc; onClose: () => void }) {
         </>
         )}
 
-        <div className="mt-5 pt-4 border-t border-border flex justify-end">
-          <Button variant="outline" onClick={onClose}>
+        </div>{/* end scrollable body */}
+
+        <div className="mt-5 pt-4 border-t border-border flex justify-end shrink-0">
+          <Button variant="outline" type="button" onClick={onClose}>
             Done
           </Button>
         </div>
