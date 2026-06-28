@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -15,6 +15,8 @@ import { clearReferralCode, getStoredReferralCode } from '@/lib/referral';
 export default function RegisterPage() {
   const register = useAuthStore((s) => s.register);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '';
   // Pre-fill country from the browser locale. The user can change it,
   // and the backend cross-checks via CDN edge headers when available.
   const [form, setForm] = useState({
@@ -43,7 +45,7 @@ export default function RegisterPage() {
       // need the local copy anymore.
       clearReferralCode();
       toast.success("You're in. 30-day free trial started.");
-      navigate('/dashboard');
+      navigate(redirect || '/dashboard');
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || 'Could not create account');
     } finally {
@@ -139,7 +141,7 @@ export default function RegisterPage() {
         </div>
 
         <a
-          href={`${import.meta.env.VITE_API_URL}/auth/google`}
+          href={`${import.meta.env.VITE_API_URL}/auth/google?redirect=${encodeURIComponent(redirect || '/dashboard')}`}
           className="mt-4 flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-fg transition hover:bg-white/10"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
@@ -155,7 +157,7 @@ export default function RegisterPage() {
       <p className="mt-6 text-center text-sm text-fg-muted">
         Already have an account?{' '}
         <Link
-          to="/login"
+          to={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
           className="font-medium text-brand-400 hover:text-brand-300"
         >
           Sign in

@@ -8,7 +8,7 @@
  *   4. Comment thread — view + add + delete own comments
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SignatureCanvas from 'react-signature-canvas';
 import { Document as PdfDocument, Page as PdfPage, pdfjs } from 'react-pdf';
@@ -121,7 +121,23 @@ type PageMode = 'idle' | 'signing' | 'declining' | 'rejecting';
 
 export default function GuestSignPage() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
   const qc = useQueryClient();
+
+  // Auth check: if the user is already logged in, redirect to the full
+  // authenticated participant editor once the document_id is known.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const tokenRaw =
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('accessToken') ||
+      '';
+    const accessToken = tokenRaw.replace(/^"|"$/g, '');
+    if (accessToken && token) {
+      setIsAuthenticated(true);
+    }
+  }, [token]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['guest', token],
@@ -154,6 +170,14 @@ export default function GuestSignPage() {
     enabled: !!token && !!data,
     staleTime: Infinity,
   });
+
+  // Once the shared doc is resolved and we know the document_id, redirect
+  // authenticated users to the full participant editor.
+  useEffect(() => {
+    if (isAuthenticated && data?.document_id) {
+      navigate(`/documents/${data.document_id}/sign?token=${token}`, { replace: true });
+    }
+  }, [isAuthenticated, data, navigate, token]);
 
   const sigPadRef = useRef<SignatureCanvas | null>(null);
   const [mode, setMode] = useState<PageMode>('idle');
@@ -258,7 +282,7 @@ export default function GuestSignPage() {
     [token]
   );
 
-  if (isLoading) {
+  if (isLoading || isAuthenticated) {
     return (
       <div className="min-h-screen grid place-items-center">
         <Spinner size="lg" />
@@ -347,6 +371,19 @@ export default function GuestSignPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        {/* Login nudge — shown to unauthenticated guests */}
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border border-brand-500/30 bg-brand-500/5 text-sm">
+          <span className="text-fg-muted">
+            Already have an account? Sign in for the full editor experience.
+          </span>
+          <Link
+            to={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}`}
+            className="shrink-0 font-medium text-brand-400 hover:text-brand-300 transition"
+          >
+            Sign in
+          </Link>
+        </div>
+
         {/* Document summary */}
         <Card>
           <CardContent>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -9,6 +9,8 @@ import { useAuthStore } from '@/store/authStore';
 export default function LoginPage() {
   const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login({ email, password });
-      navigate('/dashboard');
+      navigate(redirect || '/dashboard');
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || 'Invalid credentials');
     } finally {
@@ -83,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <a
-          href={`${import.meta.env.VITE_API_URL}/auth/google`}
+          href={`${import.meta.env.VITE_API_URL}/auth/google?redirect=${encodeURIComponent(redirect || '/dashboard')}`}
           className="mt-4 flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-fg transition hover:bg-white/10"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
@@ -99,7 +101,7 @@ export default function LoginPage() {
       <p className="mt-6 text-center text-sm text-fg-muted">
         Don't have an account?{' '}
         <Link
-          to="/register"
+          to={redirect ? `/register?redirect=${encodeURIComponent(redirect)}` : '/register'}
           className="font-medium text-brand-400 hover:text-brand-300"
         >
           Create one

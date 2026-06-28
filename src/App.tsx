@@ -48,6 +48,7 @@ import EnterprisePage from '@/pages/EnterprisePage';
 import ReferralsPage from '@/pages/ReferralsPage';
 import AdminPage from '@/pages/AdminPage';
 import GuestSignPage from '@/pages/GuestSignPage';
+import ParticipantSignPage from '@/pages/ParticipantSignPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -148,6 +149,7 @@ function App() {
             <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/documents/:id" element={<DocumentViewPage />} />
             <Route path="/documents/:id/edit" element={<DocumentEditPage />} />
+            <Route path="/documents/:id/sign" element={<ParticipantSignPage />} />
             <Route path="/signatures" element={<SignaturesPage />} />
             <Route path="/passport-photo" element={<PassportPhotoPage />} />
             <Route path="/enterprise" element={<EnterprisePage />} />
