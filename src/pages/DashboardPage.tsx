@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -8,6 +9,7 @@ import {
   ArrowUpRight,
   Calendar,
   ShieldCheck,
+  HelpCircle,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
@@ -16,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { useTour } from '@/hooks/useTour';
 import type { SegmentData, SubscriptionState } from '@/types';
 
 function StatCard({
@@ -57,6 +60,11 @@ function StatCard({
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const { startTour, triggerIfFirst } = useTour();
+
+  useEffect(() => {
+    triggerIfFirst();
+  }, [triggerIfFirst]);
 
   const { data: segments, isLoading: segLoading } = useQuery({
     queryKey: ['vault', 'segments'],
@@ -88,6 +96,16 @@ export default function DashboardPage() {
       <PageHeader
         title={`Welcome${user?.first_name ? `, ${user.first_name}` : ''}.`}
         description="Your vault, your documents, your shortcuts — all in one place."
+        actions={
+          <button
+            onClick={startTour}
+            title="Take a guided tour"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-bg-elevated px-3 py-2 text-xs font-medium text-fg-muted hover:text-fg hover:border-brand-500/40 transition"
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+            Tour
+          </button>
+        }
       />
 
       {/* Trial banner */}
@@ -150,7 +168,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Hero CTA */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden" data-tour="hero-cta">
         <div className="relative p-8 sm:p-10">
           <div
             className="absolute inset-0 opacity-30 pointer-events-none"

@@ -23,14 +23,15 @@ interface NavItem {
   icon: typeof LayoutDashboard;
   accent?: boolean;
   superAdminOnly?: boolean;
+  tourId?: string;
 }
 
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/data-vault', label: 'Data Vault', icon: Database },
-  { to: '/auto-sign', label: 'Auto-Sign', icon: FileSignature, accent: true },
-  { to: '/documents', label: 'Documents', icon: FileText },
-  { to: '/signatures', label: 'Signatures', icon: PenTool },
+  { to: '/data-vault', label: 'Data Vault', icon: Database, tourId: 'nav-vault' },
+  { to: '/auto-sign', label: 'Auto-Sign', icon: FileSignature, accent: true, tourId: 'nav-autosign' },
+  { to: '/documents', label: 'Documents', icon: FileText, tourId: 'nav-documents' },
+  { to: '/signatures', label: 'Signatures', icon: PenTool, tourId: 'nav-signatures' },
   { to: '/passport-photo', label: 'Passport Photo', icon: Camera },
   { to: '/enterprise', label: 'Enterprise', icon: Building2 },
   { to: '/billing', label: 'Billing', icon: CreditCard },
@@ -72,6 +73,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
+            {...(item.tourId ? { 'data-tour': item.tourId } : {})}
             className={({ isActive }) =>
               cn(
                 'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition',
