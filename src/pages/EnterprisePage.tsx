@@ -28,6 +28,9 @@ import { cn } from '@/lib/cn';
 const API_BASE =
   import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
+// Branded URL shown in doc snippets — never exposes the underlying host.
+const DOCS_API_BASE = 'https://api.affix-ai.com/v1';
+
 interface Enterprise {
   id: string;
   name: string;
@@ -611,12 +614,12 @@ function UsageStat({
 function ApiQuickstart({ enterpriseId: _enterpriseId }: { enterpriseId: string }) {
   const [tab, setTab] = useState<'sign' | 'batch' | 'js'>('sign');
   const examples = {
-    sign: `curl -X POST ${API_BASE}/public/sign \\
-  -H "X-API-Key: sk_test_YOUR_KEY" \\
+    sign: `curl -X POST ${DOCS_API_BASE}/public/sign \\
+  -H "X-API-Key: sk_live_YOUR_KEY" \\
   -F "file=@form.pdf" \\
   -F 'user_data={"first_name":"Ada","last_name":"Lovelace","email":"ada@example.com"}'`,
-    batch: `curl -X POST ${API_BASE}/public/sign/batch \\
-  -H "X-API-Key: sk_test_YOUR_KEY" \\
+    batch: `curl -X POST ${DOCS_API_BASE}/public/sign/batch \\
+  -H "X-API-Key: sk_live_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "documents": [
@@ -635,9 +638,9 @@ form.append('user_data', JSON.stringify({
   email: 'ada@example.com',
 }));
 
-const res = await fetch('${API_BASE}/public/sign', {
+const res = await fetch('${DOCS_API_BASE}/public/sign', {
   method: 'POST',
-  headers: { 'X-API-Key': 'sk_test_YOUR_KEY' },
+  headers: { 'X-API-Key': 'sk_live_YOUR_KEY' },
   body: form,
 });
 const { document_id, file_url } = await res.json();`,

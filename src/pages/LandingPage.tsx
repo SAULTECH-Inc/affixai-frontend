@@ -42,7 +42,7 @@ export default function LandingPage() {
           SoftwareApplication schemas live in index.html. */}
       <Seo
         title="AffixAI — Auto-sign any PDF from your encrypted vault"
-        description="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. AES-256-GCM at rest. 30-day Pro trial."
+        description="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. Bank-grade encryption at rest. 30-day Pro trial."
         path="/"
         jsonLd={{
           '@context': 'https://schema.org',
@@ -61,7 +61,7 @@ export default function LandingPage() {
               name: 'Is my data secure?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Every vault field is encrypted at rest with AES-256-GCM. We use the data to fill your forms; we never sell it or train on it.',
+                text: 'Every vault field is encrypted at rest. We use the data to fill your forms; we never sell it or train on it.',
               },
             },
             {
@@ -145,7 +145,7 @@ function Hero({ isAuthenticated }: { isAuthenticated: boolean }) {
           )}
         </div>
         <p className="mt-5 text-xs text-fg-subtle">
-          30-day free trial · AES-256-GCM encryption · Cancel anytime
+          30-day free trial · bank-grade encryption · Cancel anytime
         </p>
       </div>
 
@@ -293,7 +293,7 @@ const FEATURES = [
     icon: FolderLock,
     title: 'Encrypted Data Vault',
     body:
-      'One place for your name, addresses, IDs, employer history, and signatures. AES-256-GCM at rest. We use it. We never sell it.',
+      'One place for your name, addresses, IDs, employer history, and signatures. Encrypted at rest. We use it. We never sell it.',
   },
   {
     icon: Users,
@@ -435,9 +435,9 @@ function DataVaultSpotlight() {
             </h2>
             <p className="mt-5 text-fg-muted text-base sm:text-lg leading-relaxed">
               The vault holds the boring stuff — names, ID numbers, addresses,
-              employer history, education, signatures. It's encrypted at rest
-              with AES-256-GCM. It auto-fills any document you sign so you
-              never type the same thing twice.
+              employer history, education, signatures. It's encrypted at rest.
+              It auto-fills any document you sign so you never type the same
+              thing twice.
             </p>
             <ul className="mt-7 space-y-3 text-sm">
               {[
@@ -502,7 +502,7 @@ function SecurityStrip() {
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: Lock, title: 'AES-256-GCM', sub: 'Field-level encryption' },
+          { icon: Lock, title: 'Encrypted at rest', sub: 'Field-level encryption' },
           { icon: Shield, title: 'OAuth 2.0', sub: 'Refresh-token rotation' },
           { icon: FolderLock, title: 'Zero re-sell', sub: 'Your data, period.' },
           { icon: FileSignature, title: 'Audit log', sub: 'Every action, signed' },
