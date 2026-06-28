@@ -85,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <a
-          href={`${import.meta.env.VITE_API_URL}/auth/google?redirect=${encodeURIComponent(redirect || '/dashboard')}`}
+          href={`${import.meta.env.VITE_API_URL}/auth/google`}
           className="mt-4 flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-fg transition hover:bg-white/10"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
