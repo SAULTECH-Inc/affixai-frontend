@@ -11,6 +11,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import SignatureCanvas from 'react-signature-canvas';
+import { Document as PdfDocument, Page as PdfPage, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 import {
   ShieldCheck,
   Pen,
@@ -25,6 +30,11 @@ import {
   Send,
   Trash2,
   CornerDownLeft,
+  PenLine,
+  Type,
+  Calendar,
+  Hash,
+  Pin,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -132,6 +142,17 @@ export default function GuestSignPage() {
       return data;
     },
     enabled: !!token,
+  });
+
+  const { data: pdfBlobUrl } = useQuery({
+    queryKey: ['guest', token, 'pdf'],
+    queryFn: async () => {
+      const resp = await guestApi.get(`/shared/${token}/file`, { responseType: 'blob' });
+      const url = URL.createObjectURL(resp.data);
+      return url;
+    },
+    enabled: !!token && !!data,
+    staleTime: Infinity,
   });
 
   const sigPadRef = useRef<SignatureCanvas | null>(null);
@@ -382,6 +403,18 @@ export default function GuestSignPage() {
           </CardContent>
         </Card>
 
+        {/* PDF viewer with signing-target overlays and comment pins */}
+        {pdfBlobUrl && (
+          <GuestPdfViewer
+            pdfUrl={pdfBlobUrl}
+            targets={data.my_targets}
+            anchoredComments={comments.filter(
+              (c) => c.page !== null && c.x !== null && c.y !== null
+            )}
+            onSignatureTargetClick={() => setMode('signing')}
+          />
+        )}
+
         {/* Unresolved comment warning */}
         {myUnresolvedCount > 0 && canSign && (
           <div className="flex items-start gap-2.5 p-3 rounded-xl bg-warning/10 border border-warning/30 text-sm text-warning">
@@ -402,29 +435,11 @@ export default function GuestSignPage() {
               </h2>
               <p className="text-sm text-fg-muted mb-4">
                 {data.my_targets.length > 0
-                  ? `The sender reserved ${data.my_targets.length} spot${data.my_targets.length === 1 ? '' : 's'} on the document for you.`
+                  ? `The sender reserved ${data.my_targets.length} field${data.my_targets.length === 1 ? '' : 's'} for you — highlighted in the document above. Click any signature box directly, or use the button below.`
                   : me.role === 'signer'
-                    ? "Draw your signature on the next step. We'll stamp it on the document."
+                    ? "Draw your signature below. We'll stamp it on the document."
                     : 'Approve or decline this document.'}
               </p>
-
-              {data.my_targets.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {data.my_targets.map((t) => (
-                    <span
-                      key={t.id}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-bg-inset border border-border text-xs text-fg-muted"
-                    >
-                      <Pen className="h-3 w-3 text-brand-400" />
-                      {t.kind === 'signature' ? 'Signature'
-                        : t.kind === 'initials' ? 'Initials'
-                        : t.kind === 'date' ? 'Date'
-                        : 'Text'}
-                      <span className="text-fg-subtle">· page {t.page + 1}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
 
               <div className="flex gap-2 flex-wrap">
                 <Button
@@ -445,45 +460,6 @@ export default function GuestSignPage() {
                   <XCircle className="h-4 w-4" />
                   Decline
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Signing canvas */}
-        {mode === 'signing' && (
-          <Card>
-            <CardContent>
-              <h2 className="font-display text-lg font-semibold text-fg mb-2">
-                Draw your signature
-              </h2>
-              <p className="text-xs text-fg-muted mb-3">
-                Use your mouse, trackpad, or finger. We'll stamp it on the document.
-              </p>
-              <div className="rounded-xl border-2 border-dashed border-border bg-white p-2">
-                <SignatureCanvas
-                  ref={sigPadRef}
-                  canvasProps={{
-                    width: 600,
-                    height: 200,
-                    className: 'w-full h-[200px] rounded',
-                  }}
-                  penColor="#111"
-                />
-              </div>
-              <div className="mt-3 flex justify-between gap-2">
-                <Button variant="ghost" size="sm" onClick={() => sigPadRef.current?.clear()}>
-                  Clear
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="ghost" onClick={() => setMode('idle')} disabled={sign.isPending}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => sign.mutate()} loading={sign.isPending}>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Submit signature
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -589,6 +565,43 @@ export default function GuestSignPage() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Signing canvas modal */}
+        {mode === 'signing' && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+            <div className="bg-bg-elevated border border-border rounded-2xl shadow-card w-full max-w-lg">
+              <div className="p-5">
+                <h2 className="font-display text-lg font-semibold text-fg mb-1">
+                  Draw your signature
+                </h2>
+                <p className="text-xs text-fg-muted mb-3">
+                  Use your mouse, trackpad, or finger. We'll stamp it at every reserved spot.
+                </p>
+                <div className="rounded-xl border-2 border-dashed border-border bg-white p-2">
+                  <SignatureCanvas
+                    ref={sigPadRef}
+                    canvasProps={{ width: 560, height: 180, className: 'w-full h-[180px] rounded' }}
+                    penColor="#111"
+                  />
+                </div>
+                <div className="mt-3 flex justify-between gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => sigPadRef.current?.clear()}>
+                    Clear
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" onClick={() => setMode('idle')} disabled={sign.isPending}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => sign.mutate()} loading={sign.isPending}>
+                      <PenLine className="h-4 w-4" />
+                      Submit signature
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Comments thread */}
@@ -701,6 +714,204 @@ export default function GuestSignPage() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GuestPdfViewer — renders the PDF with signing-target overlays and comment
+// pins so guests can see exactly where their data will be placed before signing.
+// ---------------------------------------------------------------------------
+
+const RENDER_WIDTH = 800;
+
+const TARGET_STYLES: Record<
+  SigningTarget['kind'],
+  { bg: string; border: string; label: string; Icon: React.ElementType }
+> = {
+  signature: {
+    bg: 'bg-brand-500/15',
+    border: 'border-brand-500/60',
+    label: 'Sign here',
+    Icon: PenLine,
+  },
+  initials: {
+    bg: 'bg-purple-500/15',
+    border: 'border-purple-500/60',
+    label: 'Initials',
+    Icon: Hash,
+  },
+  date: {
+    bg: 'bg-emerald-500/15',
+    border: 'border-emerald-500/60',
+    label: 'Date',
+    Icon: Calendar,
+  },
+  text: {
+    bg: 'bg-sky-500/15',
+    border: 'border-sky-500/60',
+    label: 'Text',
+    Icon: Type,
+  },
+};
+
+interface GuestPdfViewerProps {
+  pdfUrl: string;
+  targets: SigningTarget[];
+  anchoredComments: GuestComment[];
+  onSignatureTargetClick: () => void;
+}
+
+function GuestPdfViewer({
+  pdfUrl,
+  targets,
+  anchoredComments,
+  onSignatureTargetClick,
+}: GuestPdfViewerProps) {
+  const [numPages, setNumPages] = useState(0);
+
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-0 bg-bg-inset">
+        {targets.length > 0 && (
+          <div className="px-4 pt-3 pb-2 border-b border-border flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-fg-muted">Your fields:</span>
+            {targets.map((t) => {
+              const s = TARGET_STYLES[t.kind];
+              return (
+                <span
+                  key={t.id}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-medium',
+                    s.bg, s.border,
+                    t.filled_at ? 'opacity-50 line-through' : ''
+                  )}
+                >
+                  <s.Icon className="h-3 w-3" />
+                  {s.label}
+                  <span className="text-fg-subtle font-normal">· p{t.page + 1}</span>
+                  {t.filled_at && <CheckCircle2 className="h-3 w-3 text-emerald-500" />}
+                </span>
+              );
+            })}
+            {anchoredComments.length > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-orange-400/50 bg-orange-400/10 text-[11px] font-medium text-orange-400">
+                <Pin className="h-3 w-3" />
+                {anchoredComments.length} comment pin{anchoredComments.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="max-h-[75vh] overflow-y-auto p-4 flex flex-col items-center gap-4">
+          <PdfDocument
+            file={pdfUrl}
+            onLoadSuccess={({ numPages: n }) => setNumPages(n)}
+            loading={<Spinner size="lg" />}
+          >
+            {Array.from({ length: numPages }, (_, pageIdx) => (
+              <GuestPdfPage
+                key={pageIdx}
+                pageIndex={pageIdx}
+                targets={targets.filter((t) => t.page === pageIdx)}
+                comments={anchoredComments.filter((c) => c.page === pageIdx)}
+                onSignatureTargetClick={onSignatureTargetClick}
+              />
+            ))}
+          </PdfDocument>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface GuestPdfPageProps {
+  pageIndex: number;
+  targets: SigningTarget[];
+  comments: GuestComment[];
+  onSignatureTargetClick: () => void;
+}
+
+function GuestPdfPage({ pageIndex, targets, comments, onSignatureTargetClick }: GuestPdfPageProps) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [pdfSize, setPdfSize] = useState({ width: RENDER_WIDTH, height: RENDER_WIDTH * 1.4 });
+  const [rendered, setRendered] = useState({ width: RENDER_WIDTH, height: RENDER_WIDTH * 1.4 });
+
+  return (
+    <div className="relative shadow-card" ref={wrapRef}>
+      <PdfPage
+        pageNumber={pageIndex + 1}
+        width={RENDER_WIDTH}
+        renderTextLayer={false}
+        renderAnnotationLayer={false}
+        onLoadSuccess={(page) => setPdfSize({ width: page.originalWidth, height: page.originalHeight })}
+        onRenderSuccess={() => {
+          const c = wrapRef.current?.querySelector('canvas');
+          if (c) setRendered({ width: c.clientWidth, height: c.clientHeight });
+        }}
+      />
+
+      {/* Signing target overlays */}
+      {targets.map((t) => {
+        const ratio = rendered.width / pdfSize.width;
+        const left = t.x * ratio;
+        const top = t.y * ratio;
+        const w = t.width * ratio;
+        const h = t.height * ratio;
+        const s = TARGET_STYLES[t.kind];
+        const isClickable = (t.kind === 'signature' || t.kind === 'initials') && !t.filled_at;
+        return (
+          <div
+            key={t.id}
+            className={cn(
+              'absolute border-2 border-dashed rounded flex items-center justify-center gap-1 transition',
+              s.bg, s.border,
+              isClickable
+                ? 'cursor-pointer hover:brightness-110 hover:scale-[1.02]'
+                : 'cursor-default',
+              t.filled_at ? 'opacity-40' : ''
+            )}
+            style={{ left, top, width: w, height: h }}
+            title={isClickable ? 'Click to sign' : s.label}
+            onClick={isClickable ? onSignatureTargetClick : undefined}
+          >
+            {t.filled_at ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <>
+                <s.Icon className="h-3.5 w-3.5 text-fg shrink-0" style={{ opacity: 0.7 }} />
+                <span className="text-[11px] font-semibold text-fg truncate" style={{ opacity: 0.85 }}>
+                  {t.label || s.label}
+                </span>
+              </>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Comment pins */}
+      {comments.map((c) => {
+        const ratio = rendered.width / pdfSize.width;
+        const left = (c.x ?? 0) * ratio;
+        const top = (c.y ?? 0) * ratio;
+        return (
+          <div
+            key={c.id}
+            className="absolute group"
+            style={{ left, top, transform: 'translate(-50%, -100%)' }}
+            title={c.body}
+          >
+            <div className="h-6 w-6 rounded-full bg-orange-400 border-2 border-white shadow-sm flex items-center justify-center cursor-default">
+              <Pin className="h-3 w-3 text-white" />
+            </div>
+            <div className="absolute bottom-7 left-1/2 -translate-x-1/2 hidden group-hover:block z-10 w-48 p-2 rounded-lg bg-bg-elevated border border-border shadow-card text-xs text-fg whitespace-pre-wrap break-words">
+              <span className="font-medium text-fg-muted block mb-0.5">
+                {c.author_name || c.author_email || 'Comment'}
+              </span>
+              {c.body}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
