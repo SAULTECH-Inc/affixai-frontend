@@ -30,6 +30,11 @@ import PricingPage from '@/pages/marketing/PricingPage';
 import PrivacyPage from '@/pages/marketing/PrivacyPage';
 import TermsPage from '@/pages/marketing/TermsPage';
 import DpaPage from '@/pages/marketing/DpaPage';
+import DocusignAlternativePage from '@/pages/marketing/DocusignAlternativePage';
+import HellosignAlternativePage from '@/pages/marketing/HellosignAlternativePage';
+import SignnowAlternativePage from '@/pages/marketing/SignnowAlternativePage';
+import AdobeSignAlternativePage from '@/pages/marketing/AdobeSignAlternativePage';
+import BestESignatureSoftware from '@/pages/marketing/blog/BestESignatureSoftware';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
@@ -122,6 +127,11 @@ function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/dpa" element={<DpaPage />} />
+          <Route path="/docusign-alternative" element={<DocusignAlternativePage />} />
+          <Route path="/hellosign-alternative" element={<HellosignAlternativePage />} />
+          <Route path="/signnow-alternative" element={<SignnowAlternativePage />} />
+          <Route path="/adobe-sign-alternative" element={<AdobeSignAlternativePage />} />
+          <Route path="/blog/best-electronic-signature-software" element={<BestESignatureSoftware />} />
 
           {/* Public */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />

@@ -224,6 +224,24 @@ function MarketingFooter() {
           ]}
         />
       </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6 border-t border-border pt-6">
+        <div className="text-xs uppercase tracking-widest text-fg-subtle font-semibold mb-3">
+          Compare Affix AI
+        </div>
+        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {[
+            ['vs DocuSign', '/docusign-alternative'],
+            ['vs HelloSign', '/hellosign-alternative'],
+            ['vs SignNow', '/signnow-alternative'],
+            ['vs Adobe Sign', '/adobe-sign-alternative'],
+            ['Best e-signature software 2025', '/blog/best-electronic-signature-software'],
+          ].map(([label, href]) => (
+            <Link key={href} to={href} className="text-fg-muted hover:text-fg transition">
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-fg-subtle">
