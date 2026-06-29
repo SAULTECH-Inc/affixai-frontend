@@ -34,17 +34,18 @@
          these on a route-by-route basis. This block is what social-card
          crawlers + non-JS bots see when they hit the entry HTML before
          React boots — important for share previews. -->
-    <title>AffixAI — Auto-sign any PDF from your encrypted vault</title>
+    <title>Affix AI — Sign Documents Online | Electronic Signature &amp; PDF Auto-fill</title>
     <meta
       name="description"
-      content="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. AES-256-GCM at rest. Built for 47+ currencies. Free 30-day Pro trial."
+      content="Sign documents online with Affix AI. Upload any PDF contract, NDA, or form — AI fills every field from your encrypted vault and collects electronic signatures. Free 30-day trial."
     />
+    <meta name="keywords" content="Affix AI, AffixAI, sign documents online, electronic signature, e-signature, PDF signing, document signing, sign PDF online, digital signature, auto-fill PDF" />
     <link rel="canonical" href="https://affix-ai.com/" />
 
     <!-- Open Graph (Facebook, LinkedIn, Slack, Discord) -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AffixAI" />
-    <meta property="og:title" content="AffixAI — Auto-sign any PDF from your encrypted vault" />
+    <meta property="og:site_name" content="Affix AI" />
+    <meta property="og:title" content="Affix AI — Sign Documents Online | Electronic Signature" />
     <meta
       property="og:description"
       content="Drop any PDF — AffixAI fills every blank, label, and signature box from your encrypted vault. Free 30-day Pro trial."
@@ -89,30 +90,86 @@
         {
           "@type": "Organization",
           "@id": "https://affix-ai.com/#organization",
-          "name": "AffixAI",
+          "name": "Affix AI",
+          "alternateName": ["AffixAI", "Affix-AI"],
           "url": "https://affix-ai.com/",
-          "logo": "https://affix-ai.com/logo.png",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://affix-ai.com/pwa-512x512.png",
+            "width": 512,
+            "height": 512
+          },
           "sameAs": [
             "https://twitter.com/affixai",
             "https://www.linkedin.com/company/affixai",
-            "https://github.com/affixai"
-          ]
+            "https://github.com/SAULTECH-Inc"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "url": "https://affix-ai.com/contact"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://affix-ai.com/#website",
+          "url": "https://affix-ai.com/",
+          "name": "Affix AI",
+          "description": "Sign documents online, auto-fill PDFs from your encrypted vault. Electronic signature software for individuals and teams.",
+          "publisher": { "@id": "https://affix-ai.com/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://affix-ai.com/blog?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
         },
         {
           "@type": "SoftwareApplication",
           "@id": "https://affix-ai.com/#software",
-          "name": "AffixAI",
-          "description": "AI-powered document signing. Auto-fills any PDF from your encrypted personal data vault.",
+          "name": "Affix AI",
+          "alternateName": ["AffixAI", "Affix AI document signer", "Affix AI e-signature"],
+          "description": "Sign documents online with AI. Auto-fills any PDF contract, NDA, or form from your encrypted vault. Electronic signatures, document routing, and team signing workflows.",
           "applicationCategory": "BusinessApplication",
-          "operatingSystem": "Web",
+          "applicationSubCategory": "Electronic Signature Software",
+          "operatingSystem": "Web, Chrome Extension",
           "url": "https://affix-ai.com/",
+          "screenshot": "https://affix-ai.com/og-default.png",
           "publisher": { "@id": "https://affix-ai.com/#organization" },
+          "featureList": [
+            "Electronic signatures",
+            "PDF auto-fill",
+            "Document routing",
+            "Encrypted data vault",
+            "Multi-party signing",
+            "Chrome extension"
+          ],
           "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Free tier — 5 documents per month. Pro from $5/mo regional pricing."
+            "description": "Free tier — 5 documents per month. Pro from $5/mo with regional pricing."
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "12"
           }
+        },
+        {
+          "@type": "ItemList",
+          "name": "Affix AI navigation",
+          "itemListElement": [
+            { "@type": "SiteNavigationElement", "position": 1, "name": "Sign Documents",   "url": "https://affix-ai.com/" },
+            { "@type": "SiteNavigationElement", "position": 2, "name": "Pricing",          "url": "https://affix-ai.com/pricing" },
+            { "@type": "SiteNavigationElement", "position": 3, "name": "About",            "url": "https://affix-ai.com/about" },
+            { "@type": "SiteNavigationElement", "position": 4, "name": "Blog",             "url": "https://affix-ai.com/blog" },
+            { "@type": "SiteNavigationElement", "position": 5, "name": "Contact",          "url": "https://affix-ai.com/contact" },
+            { "@type": "SiteNavigationElement", "position": 6, "name": "Privacy Policy",   "url": "https://affix-ai.com/privacy" },
+            { "@type": "SiteNavigationElement", "position": 7, "name": "Terms of Service", "url": "https://affix-ai.com/terms" }
+          ]
         }
       ]
     }

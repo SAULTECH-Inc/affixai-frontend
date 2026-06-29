@@ -9,7 +9,7 @@ import { Helmet } from 'react-helmet-async';
 // stay in index.html so a fresh request to a non-existent route still
 // has rich metadata — important for the share-card crawlers that don't
 // run JavaScript.
-const SITE_URL = 'https://affixai.com';
+const SITE_URL = 'https://affix-ai.com';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
 
 export interface SeoProps {

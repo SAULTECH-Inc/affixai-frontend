@@ -26,6 +26,7 @@ import AutoAffixTheEngine from '@/pages/marketing/blog/AutoAffixTheEngine';
 import TheFounderPaperworkTax from '@/pages/marketing/blog/TheFounderPaperworkTax';
 import CareersPage from '@/pages/marketing/CareersPage';
 import ContactPage from '@/pages/marketing/ContactPage';
+import PricingPage from '@/pages/marketing/PricingPage';
 import PrivacyPage from '@/pages/marketing/PrivacyPage';
 import TermsPage from '@/pages/marketing/TermsPage';
 import DpaPage from '@/pages/marketing/DpaPage';
@@ -115,6 +116,7 @@ function App() {
           <Route path="/blog/encrypting-the-vault" element={<EncryptingTheVault />} />
           <Route path="/blog/auto-affix-the-engine" element={<AutoAffixTheEngine />} />
           <Route path="/blog/the-founder-paperwork-tax" element={<TheFounderPaperworkTax />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
