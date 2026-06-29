@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Database,
@@ -13,9 +14,11 @@ import {
   ShieldCheck,
   Gift,
   X,
+  Inbox,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuthStore } from '@/store/authStore';
+import { api } from '@/lib/api';
 
 interface NavItem {
   to: string;
@@ -28,6 +31,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/inbox', label: 'Inbox', icon: Inbox },
   { to: '/data-vault', label: 'Data Vault', icon: Database, tourId: 'nav-vault' },
   { to: '/auto-sign', label: 'Auto-Sign', icon: FileSignature, accent: true, tourId: 'nav-autosign' },
   { to: '/documents', label: 'Documents', icon: FileText, tourId: 'nav-documents' },
@@ -46,6 +50,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const role = useAuthStore((s) => s.user?.role);
   const isSuperAdmin = role === 'super_admin';
   const visibleNav = NAV.filter((n) => !n.superAdminOnly || isSuperAdmin);
+
+  const { data: pendingDocs } = useQuery({
+    queryKey: ['documents', 'pending-mine'],
+    queryFn: async () => {
+      const { data } = await api.get<{ document_id: string }[]>('/documents/pending-mine');
+      return data;
+    },
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+  });
+  const pendingCount = pendingDocs?.length ?? 0;
+
   return (
     <>
       <div className="h-16 px-6 flex items-center justify-between gap-2 border-b border-border shrink-0">
@@ -97,6 +113,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {item.accent && (
                   <span className="ml-auto text-[10px] uppercase tracking-wider text-brand-400 font-semibold">
                     AI
+                  </span>
+                )}
+                {item.to === '/inbox' && pendingCount > 0 && (
+                  <span className="ml-auto inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-brand-500 text-[11px] font-bold text-white leading-none">
+                    {pendingCount > 99 ? '99+' : pendingCount}
                   </span>
                 )}
               </>

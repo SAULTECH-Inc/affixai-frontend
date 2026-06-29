@@ -10,6 +10,10 @@ import {
   Calendar,
   ShieldCheck,
   HelpCircle,
+  Inbox,
+  PenLine,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
@@ -20,6 +24,26 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { useTour } from '@/hooks/useTour';
 import type { SegmentData, SubscriptionState } from '@/types';
+
+interface PendingDoc {
+  document_id: string;
+  document_title: string;
+  invite_token: string;
+  sender_name: string | null;
+  sender_email: string | null;
+  role: 'signer' | 'reviewer' | 'viewer';
+  created_at: string;
+}
+
+function timeSince(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const hours = Math.floor(diff / 3_600_000);
+  const days = Math.floor(diff / 86_400_000);
+  if (hours < 1) return 'Just now';
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return 'Yesterday';
+  return `${days} days ago`;
+}
 
 function StatCard({
   icon: Icon,
@@ -80,6 +104,15 @@ export default function DashboardPage() {
       const { data } = await api.get<SubscriptionState>('/subscriptions/me');
       return data;
     },
+  });
+
+  const { data: pendingDocs } = useQuery({
+    queryKey: ['documents', 'pending-mine'],
+    queryFn: async () => {
+      const { data } = await api.get<PendingDoc[]>('/documents/pending-mine');
+      return data;
+    },
+    staleTime: 60_000,
   });
 
   const filledFields = segments?.reduce(
@@ -208,6 +241,73 @@ export default function DashboardPage() {
           </div>
         </div>
       </Card>
+
+      {/* Pending signatures inbox widget — only shown when there are items */}
+      {pendingDocs && pendingDocs.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-lg font-semibold text-fg flex items-center gap-2">
+              <Inbox className="h-5 w-5 text-brand-400" />
+              Waiting for your signature
+              <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-brand-500 text-[11px] font-bold text-white">
+                {pendingDocs.length}
+              </span>
+            </h3>
+            <Link
+              to="/inbox"
+              className="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1"
+            >
+              View all <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {pendingDocs.slice(0, 3).map((doc) => (
+              <Card key={doc.document_id} className="hover:border-brand-500/30 transition">
+                <CardContent className="flex items-center justify-between gap-4 py-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-lg bg-bg-inset grid place-items-center shrink-0">
+                      <PenLine className="h-4 w-4 text-brand-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-fg truncate">
+                        {doc.document_title}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-fg-muted">
+                          From {doc.sender_name || doc.sender_email || 'Unknown'}
+                        </span>
+                        <Badge tone={doc.role === 'signer' ? 'brand' : 'default'}>
+                          {doc.role}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="hidden sm:flex items-center gap-1 text-xs text-fg-subtle">
+                      <Clock className="h-3 w-3" />
+                      {timeSince(doc.created_at)}
+                    </span>
+                    <Link to={`/documents/${doc.document_id}/sign?token=${doc.invite_token}`}>
+                      <Button size="sm">
+                        Sign
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {pendingDocs.length > 3 && (
+            <Link
+              to="/inbox"
+              className="mt-2 block text-center text-xs text-fg-muted hover:text-fg py-2"
+            >
+              +{pendingDocs.length - 3} more in your inbox
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Segment progress */}
       <div className="mt-8">

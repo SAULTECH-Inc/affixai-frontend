@@ -55,6 +55,7 @@ import ReferralsPage from '@/pages/ReferralsPage';
 import AdminPage from '@/pages/AdminPage';
 import GuestSignPage from '@/pages/GuestSignPage';
 import ParticipantSignPage from '@/pages/ParticipantSignPage';
+import InboxPage from '@/pages/InboxPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -156,6 +157,7 @@ function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/inbox" element={<InboxPage />} />
             <Route path="/data-vault" element={<DataVaultPage />} />
             <Route path="/auto-sign" element={<AutoSignPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
