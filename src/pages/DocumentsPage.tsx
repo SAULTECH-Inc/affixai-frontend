@@ -20,7 +20,12 @@ import {
   MessageSquare,
   CornerDownRight,
   Check,
+  PenLine,
+  ExternalLink,
 } from 'lucide-react';
+
+const API_BASE =
+  (import.meta as any).env?.VITE_API_URL || 'https://affixai-backend.vercel.app/api/v1';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -46,6 +51,17 @@ interface Doc {
   metadata?: Record<string, any> | null;
 }
 
+interface SignedDoc {
+  document_id: string;
+  document_title: string;
+  invite_token: string;
+  sender_name: string | null;
+  sender_email: string | null;
+  role: 'signer' | 'reviewer' | 'viewer';
+  signed_at: string | null;
+  created_at: string;
+}
+
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral' | 'brand'> = {
   completed: 'success',
   signed: 'success',
@@ -66,6 +82,7 @@ function fmtSize(bytes: number): string {
 
 export default function DocumentsPage() {
   const qc = useQueryClient();
+  const [mainTab, setMainTab] = useState<'mine' | 'signed'>('mine');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   // Email modal state — which doc is being emailed (null = closed).
@@ -124,6 +141,16 @@ export default function DocumentsPage() {
     refetchInterval: 30_000,
   });
   const draftCount = draftDocs?.length ?? 0;
+
+  const { data: signedDocs, isLoading: signedLoading } = useQuery({
+    queryKey: ['documents', 'signed-mine'],
+    queryFn: async () => {
+      const { data } = await api.get<SignedDoc[]>('/documents/signed-mine');
+      return data;
+    },
+    staleTime: 60_000,
+    enabled: mainTab === 'signed',
+  });
 
   const filtered = useMemo(() => {
     if (!docs) return [];
@@ -184,7 +211,106 @@ export default function DocumentsPage() {
         }
       />
 
-      <Card>
+      {/* Main tab bar */}
+      <div className="flex items-center gap-1 mb-4 border-b border-border">
+        {([
+          { id: 'mine', label: 'My documents' },
+          { id: 'signed', label: 'Signed by me' },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setMainTab(t.id)}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition',
+              mainTab === t.id
+                ? 'border-brand-500 text-fg'
+                : 'border-transparent text-fg-muted hover:text-fg'
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Signed by me tab */}
+      {mainTab === 'signed' && (
+        <Card>
+          <CardContent>
+            {signedLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16" />
+                ))}
+              </div>
+            ) : !signedDocs?.length ? (
+              <EmptyState
+                icon={<CheckCircle2 className="h-6 w-6" />}
+                title="No co-signed documents yet"
+                description="Documents you sign as an invitee will appear here."
+              />
+            ) : (
+              <div className="space-y-2">
+                {signedDocs.map((d) => (
+                  <div
+                    key={d.document_id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 p-3 rounded-xl border border-border bg-bg-inset hover:bg-bg-elevated transition"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-bg-elevated border border-border grid place-items-center text-fg-muted shrink-0">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-fg truncate">
+                          {d.document_title}
+                        </div>
+                        <div className="text-xs text-fg-subtle flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                          <span>
+                            From{' '}
+                            <span className="text-fg-muted">
+                              {d.sender_name || d.sender_email || 'Unknown'}
+                            </span>
+                          </span>
+                          <span>·</span>
+                          <Badge tone="success">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Signed
+                          </Badge>
+                          <Badge tone={d.role === 'signer' ? 'brand' : 'neutral'}>
+                            <PenLine className="h-3 w-3" />
+                            {d.role.charAt(0).toUpperCase() + d.role.slice(1)}
+                          </Badge>
+                          {d.signed_at && (
+                            <>
+                              <span>·</span>
+                              <span>
+                                {new Date(d.signed_at).toLocaleDateString()}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <a
+                        href={`${API_BASE}/shared/${d.invite_token}/file`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button size="sm" variant="outline">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Open PDF
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {mainTab === 'mine' && <Card>
         <CardContent>
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
@@ -354,7 +480,7 @@ export default function DocumentsPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
       {shareDoc && (
         <ShareModal doc={shareDoc} onClose={() => setShareDoc(null)} />
