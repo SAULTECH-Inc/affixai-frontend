@@ -27,8 +27,13 @@ import {
   Save,
   Layers,
 } from 'lucide-react';
+import axios from 'axios';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+
+const API_BASE =
+  import.meta.env.VITE_API_URL || 'https://affixai-backend.vercel.app/api/v1';
+const guestApi = axios.create({ baseURL: API_BASE });
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -277,14 +282,15 @@ export default function ParticipantSignPage() {
     setHasLoadedTargets(true);
   }, [sharedData, hasLoadedTargets]);
 
-  // Fetch the original PDF.
+  // Fetch the document PDF via the shared token endpoint (participants don't
+  // own the document so the owner-only /documents/:id/file route would 404).
   useEffect(() => {
-    if (!id) return;
+    if (!inviteToken) return;
     let cancelled = false;
     let objUrl: string | null = null;
     (async () => {
       try {
-        const resp = await api.get(`/documents/${id}/file`, {
+        const resp = await guestApi.get(`/shared/${inviteToken}/file`, {
           responseType: 'blob',
         });
         if (cancelled) return;
@@ -299,7 +305,7 @@ export default function ParticipantSignPage() {
       cancelled = true;
       if (objUrl) URL.revokeObjectURL(objUrl);
     };
-  }, [id, navigate]);
+  }, [inviteToken, navigate]);
 
   // Fetch the user's default signature blob URL for preview.
   const { data: defaultSigUrl } = useQuery({
