@@ -276,7 +276,7 @@ export default function DashboardPage() {
                         <span className="text-xs text-fg-muted">
                           From {doc.sender_name || doc.sender_email || 'Unknown'}
                         </span>
-                        <Badge tone={doc.role === 'signer' ? 'brand' : 'default'}>
+                        <Badge tone={doc.role === 'signer' ? 'brand' : 'neutral'}>
                           {doc.role}
                         </Badge>
                       </div>

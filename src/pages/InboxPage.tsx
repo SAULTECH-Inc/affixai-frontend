@@ -44,8 +44,8 @@ function RoleIcon({ role }: { role: string }) {
   return <PenLine className="h-4 w-4 text-brand-400" />;
 }
 
-function roleTone(role: string): 'brand' | 'default' {
-  return role === 'signer' ? 'brand' : 'default';
+function roleTone(role: string): 'brand' | 'neutral' {
+  return role === 'signer' ? 'brand' : 'neutral';
 }
 
 function roleLabel(role: string): string {
