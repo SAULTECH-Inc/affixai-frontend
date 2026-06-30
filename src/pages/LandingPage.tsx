@@ -531,14 +531,17 @@ function ChromeExtensionSection() {
                 Get early access
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-              <div className="inline-flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-5 py-3 text-sm font-medium text-fg-muted cursor-default select-none">
+              <a
+                href="https://chromewebstore.google.com/detail/affixai-auto-fill-forms/laiemadhbgcgpiboejbabkijmkfhapnl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-5 py-3 text-sm font-medium text-fg-muted hover:border-brand-400 hover:text-fg-base transition"
+              >
                 <Globe className="h-4 w-4 shrink-0" />
-                Chrome Web Store — coming soon
-              </div>
+                Get it on Chrome Web Store
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </a>
             </div>
-            <p className="mt-4 text-xs text-fg-subtle">
-              Create a free account to join the early access programme and be notified when the extension launches on the Chrome Web Store.
-            </p>
           </div>
           {/* Right: visual demo */}
           <div className="relative">
