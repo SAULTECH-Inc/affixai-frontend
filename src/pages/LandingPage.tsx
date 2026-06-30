@@ -532,7 +532,7 @@ function ChromeExtensionSection() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <a
-                href="https://chromewebstore.google.com/detail/affixai-auto-fill-forms/laiemadhbgcgpiboejbabkijmkfhapnl"
+                href="https://chromewebstore.google.com/detail/fpkilafdnbibodlgihehnfcbcccgebhd"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-5 py-3 text-sm font-medium text-fg-muted hover:border-brand-400 hover:text-fg-base transition"
