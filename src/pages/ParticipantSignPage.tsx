@@ -479,7 +479,8 @@ export default function ParticipantSignPage() {
                 <Spinner size="lg" />
               </div>
             ) : (
-              <div className="max-h-[80vh] overflow-y-auto p-4 flex flex-col items-center gap-4">
+              <div className="max-h-[80vh] overflow-auto">
+                <div className="p-4 flex flex-col items-center gap-4 w-fit min-w-full">
                 <Document
                   file={pdfUrl}
                   onLoadSuccess={({ numPages }) => setNumPages(numPages)}
@@ -529,6 +530,7 @@ export default function ParticipantSignPage() {
                     />
                   ))}
                 </Document>
+                </div>
               </div>
             )}
           </CardContent>
