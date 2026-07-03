@@ -41,7 +41,7 @@ export function Seo({
   jsonLd,
 }: SeoProps) {
   const fullTitle = title.endsWith('AffixAI') ? title : `${title} · AffixAI`;
-  const canonical = `${SITE_URL}${path === '/' ? '' : path}`;
+  const canonical = `${SITE_URL}${path}`;
   const image = ogImage ?? DEFAULT_OG_IMAGE;
 
   return (
