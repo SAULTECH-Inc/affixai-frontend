@@ -21,10 +21,14 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5"
     />
 
-    <!-- Favicons + PWA manifest. The SVG icon scales crisply at every size;
-         the .ico exists for legacy browsers + bookmark bars. -->
+    <!-- Favicons + PWA manifest.
+         Google Search requires a PNG favicon (ignores SVG) at ≥48×48px.
+         pwa-192x192.png is the canonical source Google will use.
+         SVG is kept as the primary browser tab icon (crisp at all sizes).
+         favicon.ico removed — file did not exist, causing 404s. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <!-- Manifest is generated at build time by vite-plugin-pwa
          (manifest.webmanifest in dist/). Dev preview won't have it yet
