@@ -89,9 +89,48 @@
          in-browser preview matches the final stamped PDF. -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Dancing+Script&family=Great+Vibes&family=Sacramento&display=swap" rel="stylesheet">
 
-    <!-- JSON-LD: Organization + SoftwareApplication. Tells Google what
-         AffixAI is so it can show rich results (sitelinks, knowledge
-         panel, product carousel). Inline is the recommended pattern. -->
+    <!-- WebSite schema — standalone block required by Google's Site Name
+         feature. Must be a top-level @type (NOT nested in @graph) for
+         Google to use it as the displayed site name in search results. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Affix AI",
+      "alternateName": "AffixAI",
+      "url": "https://affix-ai.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://affix-ai.com/blog?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- SiteNavigationElement — tells Google which pages to surface as
+         sitelinks beneath the main search result. Use action-oriented
+         labels (Sign Up, Log In, Pricing) so they match searcher intent. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Affix AI site navigation",
+      "itemListElement": [
+        { "@type": "SiteNavigationElement", "position": 1, "name": "Sign Up Free",          "url": "https://affix-ai.com/register" },
+        { "@type": "SiteNavigationElement", "position": 2, "name": "Log In",                "url": "https://affix-ai.com/login" },
+        { "@type": "SiteNavigationElement", "position": 3, "name": "Pricing",               "url": "https://affix-ai.com/pricing" },
+        { "@type": "SiteNavigationElement", "position": 4, "name": "Auto-Sign Documents",   "url": "https://affix-ai.com/auto-sign" },
+        { "@type": "SiteNavigationElement", "position": 5, "name": "About Affix AI",        "url": "https://affix-ai.com/about" },
+        { "@type": "SiteNavigationElement", "position": 6, "name": "Blog",                  "url": "https://affix-ai.com/blog" }
+      ]
+    }
+    </script>
+
+    <!-- Organization + SoftwareApplication: knowledge panel, product
+         carousel, rich results. Keep in @graph for internal @id linking. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -120,22 +159,6 @@
           }
         },
         {
-          "@type": "WebSite",
-          "@id": "https://affix-ai.com/#website",
-          "url": "https://affix-ai.com/",
-          "name": "Affix AI",
-          "description": "Sign documents online, auto-fill PDFs from your encrypted vault. Electronic signature software for individuals and teams.",
-          "publisher": { "@id": "https://affix-ai.com/#organization" },
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-              "@type": "EntryPoint",
-              "urlTemplate": "https://affix-ai.com/blog?q={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-          }
-        },
-        {
           "@type": "SoftwareApplication",
           "@id": "https://affix-ai.com/#software",
           "name": "Affix AI",
@@ -159,26 +182,13 @@
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Free tier — 5 documents per month. Pro from $5/mo with regional pricing."
+            "description": "Free tier — 5 documents per month. Pro from $19/mo with regional pricing."
           },
           "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "4.8",
             "reviewCount": "12"
           }
-        },
-        {
-          "@type": "ItemList",
-          "name": "Affix AI navigation",
-          "itemListElement": [
-            { "@type": "SiteNavigationElement", "position": 1, "name": "Sign Documents",   "url": "https://affix-ai.com/" },
-            { "@type": "SiteNavigationElement", "position": 2, "name": "Pricing",          "url": "https://affix-ai.com/pricing" },
-            { "@type": "SiteNavigationElement", "position": 3, "name": "About",            "url": "https://affix-ai.com/about" },
-            { "@type": "SiteNavigationElement", "position": 4, "name": "Blog",             "url": "https://affix-ai.com/blog" },
-            { "@type": "SiteNavigationElement", "position": 5, "name": "Contact",          "url": "https://affix-ai.com/contact" },
-            { "@type": "SiteNavigationElement", "position": 6, "name": "Privacy Policy",   "url": "https://affix-ai.com/privacy" },
-            { "@type": "SiteNavigationElement", "position": 7, "name": "Terms of Service", "url": "https://affix-ai.com/terms" }
-          ]
         }
       ]
     }
