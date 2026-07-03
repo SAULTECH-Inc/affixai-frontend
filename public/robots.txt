@@ -1,17 +1,19 @@
 # AffixAI — robots policy.
 #
-# We allow indexing of the public marketing pages (/, /about, /blog,
-# /pricing anchors, /privacy, /terms, /dpa, /contact, /careers) and the
-# blog posts. Auth-walled routes (/dashboard, /documents, /data-vault,
-# /signatures, /billing, /admin, /referrals, /settings, /enterprise) are
-# blocked because they 401 to crawlers anyway and we don't want soft 404s
-# clogging up the index.
+# Auth-walled app routes are blocked because they 401 to crawlers and
+# we don't want soft 404s clogging up the index.
 #
-# /invite/:token (guest signing magic links) are noindexed — they're
-# one-time-use tokens and shouldn't end up in a search engine.
+# /login and /register are PUBLIC pages — allowed so Google can index
+# them and surface "Log In" / "Sign Up Free" as sitelinks under the
+# brand search result.
+#
+# /invite/:token (guest signing magic links) are blocked — one-time-use
+# tokens that should never appear in search results.
 
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /register
 Disallow: /dashboard
 Disallow: /documents
 Disallow: /data-vault
@@ -23,10 +25,8 @@ Disallow: /referrals
 Disallow: /settings
 Disallow: /enterprise
 Disallow: /invite/
-Disallow: /login
-Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
 
-# Sitemap. Update the URL once the domain is finalized.
+# Sitemap
 Sitemap: https://affix-ai.com/sitemap.xml
