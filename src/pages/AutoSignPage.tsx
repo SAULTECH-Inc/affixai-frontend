@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { FileSignature, FileText, Loader2, Download, Sparkles, AlertTriangle, Edit3 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import type { AutoSignOut } from '@/types';
 
 export default function AutoSignPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<AutoSignOut | null>(null);
@@ -42,6 +43,21 @@ export default function AutoSignPage() {
       }
     },
   });
+
+  // When the extension uploads a PDF and opens this page with ?doc=<id>,
+  // fetch the file and auto-trigger signing so the user lands on the result.
+  useEffect(() => {
+    const docId = searchParams.get('doc');
+    if (!docId || sign.isPending || result) return;
+    api.get(`/documents/${docId}/file`, { responseType: 'blob' })
+      .then((resp) => {
+        const f = new File([resp.data], 'document.pdf', { type: 'application/pdf' });
+        setFile(f);
+        sign.mutate(f);
+      })
+      .catch(() => toast.error('Could not load the uploaded document.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function startOver() {
     setFile(null);
