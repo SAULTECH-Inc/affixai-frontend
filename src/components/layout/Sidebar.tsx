@@ -15,6 +15,7 @@ import {
   Gift,
   X,
   Inbox,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuthStore } from '@/store/authStore';
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { to: '/inbox', label: 'Inbox', icon: Inbox },
   { to: '/data-vault', label: 'Data Vault', icon: Database, tourId: 'nav-vault' },
   { to: '/auto-sign', label: 'Auto-Sign', icon: FileSignature, accent: true, tourId: 'nav-autosign' },
+  { to: '/convert', label: 'Converter', icon: ArrowRightLeft },
   { to: '/documents', label: 'Documents', icon: FileText, tourId: 'nav-documents' },
   { to: '/signatures', label: 'Signatures', icon: PenTool, tourId: 'nav-signatures' },
   { to: '/passport-photo', label: 'Passport Photo', icon: Camera },
