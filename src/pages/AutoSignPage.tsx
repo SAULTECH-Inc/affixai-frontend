@@ -88,7 +88,7 @@ export default function AutoSignPage() {
     <div>
       <PageHeader
         title="Auto-Sign"
-        description="Drop any PDF. We'll find the labeled fields, fill them from your vault, and stamp your signature."
+        description="Drop any PDF or Word document. We'll find the labeled fields, fill them from your vault, and stamp your signature."
         actions={
           <Badge tone="brand">
             <Sparkles className="h-3 w-3" />
@@ -107,7 +107,7 @@ export default function AutoSignPage() {
               <input
                 ref={fileRef}
                 type="file"
-                accept="application/pdf"
+                accept="application/pdf,.pdf,.docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -130,13 +130,13 @@ export default function AutoSignPage() {
                   : 'Drop a document here'}
               </h3>
               <p className="mt-1.5 text-sm text-fg-muted">
-                We support digital PDFs with labelled form fields. Image-only PDFs
-                will work soon.
+                PDFs and Word documents with labelled form fields. Word files are
+                converted to PDF first — you'll get a signed PDF back.
               </p>
               {!sign.isPending && (
                 <div className="mt-6 inline-flex items-center gap-2 text-xs text-fg-subtle">
                   <FileText className="h-3.5 w-3.5" />
-                  PDF only · max 50MB
+                  PDF or DOCX · max 50MB
                 </div>
               )}
             </div>

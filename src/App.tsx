@@ -43,6 +43,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import DataVaultPage from '@/pages/DataVaultPage';
 import AutoSignPage from '@/pages/AutoSignPage';
+import ConverterPage from '@/pages/ConverterPage';
 import BillingPage from '@/pages/BillingPage';
 import SettingsPage from '@/pages/SettingsPage';
 import DocumentsPage from '@/pages/DocumentsPage';
@@ -160,6 +161,7 @@ function App() {
             <Route path="/inbox" element={<InboxPage />} />
             <Route path="/data-vault" element={<DataVaultPage />} />
             <Route path="/auto-sign" element={<AutoSignPage />} />
+            <Route path="/convert" element={<ConverterPage />} />
             <Route path="/documents" element={<DocumentsPage />} />
             <Route path="/documents/:id" element={<DocumentViewPage />} />
             <Route path="/documents/:id/edit" element={<DocumentEditPage />} />
