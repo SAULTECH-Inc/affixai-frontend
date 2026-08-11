@@ -7,6 +7,7 @@ import {
   Trash2,
   Search,
   FileSignature,
+  FilePlus2,
   Filter,
   Mail,
   Pencil,
@@ -37,6 +38,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Label } from '@/components/ui/Label';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { NewDocumentSheet } from '@/components/documents/NewDocumentSheet';
 import { cn } from '@/lib/cn';
 
 interface Doc {
@@ -93,6 +95,8 @@ export default function DocumentsPage() {
   const [emailMsg, setEmailMsg] = useState('');
   // Share/collaborate modal state.
   const [shareDoc, setShareDoc] = useState<Doc | null>(null);
+  // "New blank document" sheet.
+  const [newDocOpen, setNewDocOpen] = useState(false);
 
   const sendEmail = useMutation({
     mutationFn: async () => {
@@ -200,16 +204,24 @@ export default function DocumentsPage() {
     <div>
       <PageHeader
         title="Documents"
-        description="All documents you've uploaded or signed."
+        description="All documents you've uploaded, created or signed."
         actions={
-          <Link to="/auto-sign">
-            <Button>
-              <FileSignature className="h-4 w-4" />
-              Auto-Sign new
+          <>
+            <Button variant="outline" onClick={() => setNewDocOpen(true)}>
+              <FilePlus2 className="h-4 w-4" />
+              New document
             </Button>
-          </Link>
+            <Link to="/auto-sign">
+              <Button>
+                <FileSignature className="h-4 w-4" />
+                Auto-Sign new
+              </Button>
+            </Link>
+          </>
         }
       />
+
+      <NewDocumentSheet open={newDocOpen} onClose={() => setNewDocOpen(false)} />
 
       {/* Main tab bar */}
       <div className="flex items-center gap-1 mb-4 border-b border-border">

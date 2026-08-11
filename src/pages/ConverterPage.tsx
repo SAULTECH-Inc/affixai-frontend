@@ -8,6 +8,7 @@ import {
   FileCode,
   FileText,
   FileType2,
+  Info,
   RotateCcw,
   Upload,
   X,
@@ -445,6 +446,26 @@ export default function ConverterPage() {
             Files are converted in-memory and streamed straight back — nothing is
             saved to your document library.
           </p>
+
+          {/* Honest expectations. A PDF stores positioned glyphs rather than
+              structure, so converting *out* of PDF is a reconstruction, not a
+              lossless change of container. Saying so here costs less than a
+              user assuming their layout will survive intact. */}
+          {source === 'pdf' && target && target !== 'pdf' && (
+            <div className="mt-4 flex gap-2.5 p-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.07]">
+              <Info className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+              <div className="text-xs text-fg-muted leading-relaxed">
+                <span className="font-semibold text-fg">
+                  Converting out of PDF rebuilds the layout.
+                </span>{' '}
+                PDFs store positioned text, not structure, so we reconstruct
+                paragraphs and columns. Text-heavy documents convert cleanly.
+                Multi-column designs — CVs, brochures, anything from a design
+                tool — keep their text but may reflow, change page count, or
+                lose decorative styling.
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
