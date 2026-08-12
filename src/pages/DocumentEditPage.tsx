@@ -17,6 +17,7 @@ import {
   CloudOff,
   Loader2,
   MessageSquare,
+  Lock,
   Send as SendIcon,
   CornerDownRight,
   Trash2,
@@ -32,8 +33,18 @@ import { Spinner } from '@/components/ui/Spinner';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Sheet } from '@/components/ui/Sheet';
 import { PageHeader } from '@/components/layout/PageHeader';
+import {
+  AUTHORING_DEFAULT_SIZE,
+  AUTHORING_ICONS,
+  AUTHORING_KINDS,
+  AuthoringInspector,
+  AuthoringPreview,
+  ProtectDialog,
+  isAuthoringKind,
+} from '@/components/editor/ElementPanels';
 import { cn } from '@/lib/cn';
 import type {
+  DocumentAsset,
   Placement,
   PlacementKind,
   RestampOut,
@@ -78,6 +89,23 @@ function normalisePersistedPlacement(p: any): Placement {
       fontsize: p.fontsize ?? 10,
       width: p.width ?? 160,
       height: p.height ?? 18,
+      font_family: p.font_family ?? undefined,
+      bold: p.bold ?? undefined,
+      italic: p.italic ?? undefined,
+      color: p.color ?? undefined,
+      // Authoring fields must be carried through explicitly. Dropping them
+      // here would silently lose a table's rows or a link's address the moment
+      // the user reopened the document — the placement would still be there,
+      // just empty.
+      asset_id: p.asset_id ?? null,
+      url: p.url ?? null,
+      html: p.html ?? null,
+      rows: p.rows ?? null,
+      header: p.header ?? undefined,
+      col_widths: p.col_widths ?? null,
+      border_color: p.border_color ?? undefined,
+      align: p.align ?? undefined,
+      keep_proportion: p.keep_proportion ?? undefined,
     };
   }
   // Auto-affix shape stores `y` as the text baseline. Convert to "overlay top"
@@ -286,9 +314,27 @@ export default function DocumentEditPage() {
     (async () => {
       try {
         const { data } = await api.get(`/documents/${id}`);
+        if (data?.original_file_name) setDocName(data.original_file_name);
         const persisted = (data?.field_placements ?? []) as any[];
         const initial = persisted.map(normalisePersistedPlacement);
         setPlacements((current) => (current.length > 0 ? current : initial));
+
+        // Images are stored as ids, so a reopened document has nothing to
+        // preview until we fetch the bytes. Without this the canvas would show
+        // "Choose an image" over a placement that is actually set, and re-saving
+        // would look like it had lost the image.
+        const assets = (data?.metadata?.assets ?? {}) as Record<string, unknown>;
+        for (const assetId of Object.keys(assets)) {
+          api
+            .get(`/documents/${id}/assets/${assetId}`, { responseType: 'blob' })
+            .then((resp) => {
+              const objectUrl = URL.createObjectURL(resp.data as Blob);
+              setAssetUrls((m) => ({ ...m, [assetId]: objectUrl }));
+            })
+            .catch(() => {
+              /* a missing asset just stays unpreviewed */
+            });
+        }
       } catch {
         /* ignore — start with empty state */
       } finally {
@@ -363,6 +409,21 @@ export default function DocumentEditPage() {
     items.push({ id: 'ph.time', label: 'Time', kind: 'time', value: '', icon: <Clock className="h-3.5 w-3.5" />, width: 70, height: 18 });
     items.push({ id: 'ph.signature', label: 'Signature', kind: 'signature', icon: <PenTool className="h-3.5 w-3.5" />, width: 180, height: 40 });
     items.push({ id: 'ph.photo', label: 'Passport Photo', kind: 'photo', icon: <Camera className="h-3.5 w-3.5" />, width: 100, height: 130 });
+    // Authoring elements. Each drops in empty and is configured in the
+    // inspector once selected, so dragging one on is never blocked by a modal.
+    for (const kind of AUTHORING_KINDS) {
+      const size = AUTHORING_DEFAULT_SIZE[kind];
+      items.push({
+        id: `ph.${kind}`,
+        label: { image: 'Image', link: 'Link', richtext: 'Text block', table: 'Table' }[
+          kind as 'image' | 'link' | 'richtext' | 'table'
+        ],
+        kind,
+        icon: AUTHORING_ICONS[kind],
+        width: size.width,
+        height: size.height,
+      });
+    }
 
     // Then vault fields the user has saved.
     if (segments && schema) {
@@ -542,6 +603,12 @@ export default function DocumentEditPage() {
   });
 
   // ---- Email signed document ----------------------------------------------
+  // asset_id -> a URL we can preview on the canvas. Populated when the user
+  // uploads (from the local File) and from the document's own asset record on
+  // load, so reopening a document still shows its images.
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  const [docName, setDocName] = useState('document.pdf');
+  const [protectOpen, setProtectOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [emailTo, setEmailTo] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
@@ -672,6 +739,14 @@ export default function DocumentEditPage() {
             </Button>
             <Button
               variant="outline"
+              onClick={() => setProtectOpen(true)}
+              title="Download an AES-256 encrypted copy"
+            >
+              <Lock className="h-4 w-4" />
+              Protect
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setEmailOpen(true)}
               disabled={placements.length === 0}
               title="Email the signed document"
@@ -689,6 +764,13 @@ export default function DocumentEditPage() {
             </Button>
           </div>
         }
+      />
+
+      <ProtectDialog
+        documentId={id!}
+        fileName={docName}
+        open={protectOpen}
+        onClose={() => setProtectOpen(false)}
       />
 
       {emailOpen && (
@@ -727,6 +809,7 @@ export default function DocumentEditPage() {
                       placements={placements}
                       defaultSigUrl={defaultSigUrl ?? null}
                       defaultPhotoUrl={defaultPhotoUrl ?? null}
+                      assetUrls={assetUrls}
                       isArmed={armedItem !== null}
                       onDrop={(e, p, w) => handleDrop(e, p, w)}
                       onCanvasClick={(e, p, w) => handleCanvasClick(e, p, w)}
@@ -795,6 +878,10 @@ export default function DocumentEditPage() {
               onPaletteSearch={setPaletteSearch}
               onArm={(it) => setArmedItem((cur) => (cur?.id === it.id ? null : it))}
               onDisarm={() => setArmedItem(null)}
+              documentId={id!}
+              onAssetUploaded={(a, url) =>
+                setAssetUrls((m) => ({ ...m, [a.asset_id]: url }))
+              }
               onDefaultsChange={updateDefaults}
               onPaletteDragStart={(it) => {
                 dragSourceRef.current = { kind: 'palette', item: it };
@@ -841,6 +928,10 @@ export default function DocumentEditPage() {
           onPaletteSearch={setPaletteSearch}
           onArm={(it) => { setArmedItem((cur) => (cur?.id === it.id ? null : it)); setSheetOpen(false); }}
           onDisarm={() => setArmedItem(null)}
+          documentId={id!}
+          onAssetUploaded={(a, url) =>
+            setAssetUrls((m) => ({ ...m, [a.asset_id]: url }))
+          }
           onDefaultsChange={updateDefaults}
           onPaletteDragStart={(it) => {
             dragSourceRef.current = { kind: 'palette', item: it };
@@ -872,6 +963,8 @@ interface EditPalettePanelProps {
   onPaletteDragEnd: () => void;
   onDeselect: () => void;
   onPlacementChange: (changes: Partial<Placement>) => void;
+  documentId: string;
+  onAssetUploaded: (asset: DocumentAsset, objectUrl: string) => void;
 }
 
 function EditPalettePanel({
@@ -889,14 +982,35 @@ function EditPalettePanel({
   onPaletteDragEnd,
   onDeselect,
   onPlacementChange,
+  documentId,
+  onAssetUploaded,
 }: EditPalettePanelProps) {
   if (selectedIdx !== null && placements[selectedIdx]) {
+    const selected = placements[selectedIdx];
+    // Authoring elements get their own property editor above the shared font
+    // controls — a table needs rows, a link needs an address, and neither is
+    // expressible in the font panel.
     return (
-      <FontControlsPanel
-        placement={placements[selectedIdx]}
-        onChange={onPlacementChange}
-        onDeselect={onDeselect}
-      />
+      <>
+        {isAuthoringKind(selected.kind) && (
+          <div className="mb-4 pb-4 border-b border-border">
+            <h2 className="font-display text-base font-semibold text-fg mb-3 capitalize">
+              {selected.kind === 'richtext' ? 'Text block' : selected.kind}
+            </h2>
+            <AuthoringInspector
+              placement={selected}
+              documentId={documentId}
+              onChange={onPlacementChange}
+              onAssetUploaded={onAssetUploaded}
+            />
+          </div>
+        )}
+        <FontControlsPanel
+          placement={selected}
+          onChange={onPlacementChange}
+          onDeselect={onDeselect}
+        />
+      </>
     );
   }
   return (
@@ -1214,6 +1328,7 @@ interface PdfPageWithOverlayProps {
   placements: Placement[];
   defaultSigUrl: string | null;
   defaultPhotoUrl: string | null;
+  assetUrls: Record<string, string>;
   selectedIdx: number | null;
   isArmed: boolean;
   onDrop: (
@@ -1247,6 +1362,7 @@ function PdfPageWithOverlay({
   placements,
   defaultSigUrl,
   defaultPhotoUrl,
+  assetUrls,
   selectedIdx,
   isArmed,
   onDrop,
@@ -1330,6 +1446,7 @@ function PdfPageWithOverlay({
               isSelected={selectedIdx === idx}
               defaultSigUrl={defaultSigUrl}
               defaultPhotoUrl={defaultPhotoUrl}
+              assetUrls={assetUrls}
               onDragStart={(ox, oy) => onPlacementDragStart(idx, ox, oy)}
               onDragEnd={onPlacementDragEnd}
               onDelete={() => onPlacementDelete(idx)}
@@ -1387,6 +1504,7 @@ function OverlayBox({
   isSelected,
   defaultSigUrl,
   defaultPhotoUrl,
+  assetUrls,
   onDragStart,
   onDragEnd,
   onDelete,
@@ -1403,13 +1521,17 @@ function OverlayBox({
   isSelected: boolean;
   defaultSigUrl: string | null;
   defaultPhotoUrl: string | null;
+  assetUrls: Record<string, string>;
   onDragStart: (offsetX: number, offsetY: number) => void;
   onDragEnd: () => void;
   onDelete: () => void;
   onValueChange: (v: string) => void;
   onClick: () => void;
 }) {
-  const isImageKind = p.kind === 'signature' || p.kind === 'photo';
+  // "Box" kinds occupy a rectangle, so the overlay is sized rather than
+  // hugging its content, and the text-styling preview doesn't apply.
+  const isImageKind =
+    p.kind === 'signature' || p.kind === 'photo' || isAuthoringKind(p.kind);
   const previewUrl =
     p.kind === 'signature' ? defaultSigUrl
     : p.kind === 'photo' ? defaultPhotoUrl
@@ -1498,6 +1620,9 @@ function OverlayBox({
           ) : (
             <span className="text-danger italic">No photo saved</span>
           )
+        )}
+        {isAuthoringKind(p.kind) && (
+          <AuthoringPreview placement={p} assetUrls={assetUrls} />
         )}
         {p.kind === 'initials' && (
           <span>{p.value || 'Initials'}</span>

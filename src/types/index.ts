@@ -142,7 +142,12 @@ export type PlacementKind =
   | 'time'
   | 'initials'
   | 'signature'
-  | 'photo';
+  | 'photo'
+  // Authoring kinds — these render into a rectangle rather than at a point.
+  | 'image'
+  | 'link'
+  | 'richtext'
+  | 'table';
 
 export interface Placement {
   kind: PlacementKind;
@@ -159,6 +164,33 @@ export interface Placement {
   bold?: boolean;
   italic?: boolean;
   color?: string;             // hex like "#000000"
+
+  // ---- Authoring kinds ----------------------------------------------------
+  // An id issued by POST /documents/{id}/assets. Never a URL: the server
+  // resolves ids against its own record of what was uploaded to the document,
+  // which is what stops a placement pointing the renderer somewhere else.
+  asset_id?: string | null;
+  url?: string | null;        // kind="link"
+  html?: string | null;       // kind="richtext"
+  rows?: string[][] | null;   // kind="table", row-major
+  header?: boolean;           // kind="table", style the first row
+  col_widths?: number[] | null;
+  border_color?: string;
+  align?: 'left' | 'right' | 'center' | 'justify';
+  keep_proportion?: boolean;
+}
+
+/** Kinds that occupy a rectangle and so need width/height, not just a point. */
+export const BOX_PLACEMENT_KINDS: PlacementKind[] = [
+  'signature', 'photo', 'image', 'link', 'richtext', 'table',
+];
+
+export interface DocumentAsset {
+  asset_id: string;
+  mime_type: string;
+  size: number;
+  width?: number | null;
+  height?: number | null;
 }
 
 export interface RestampOut {
